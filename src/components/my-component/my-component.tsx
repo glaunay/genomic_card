@@ -6,12 +6,25 @@ import { Component, Prop } from '@stencil/core';
   shadow: true
 })
 export class MyComponent {
+// *************************** PROPERTY & CONSTRUCTOR ***************************
   private orgSelected:string="premier";
 
   @Prop() org_names: string;
   @Prop() height_svg: number;
   @Prop() with_svg: number;
 
+  constructor() {
+    this.changeOrg = this.changeOrg.bind(this);
+  }
+
+
+// *************************** CLICK ***************************
+  changeOrg() {
+    console.log("Changement");
+  }
+
+
+// *************************** DISPLAY ***************************
   render() {
     let tabOrgName = this.org_names.split("&");
     return ([
@@ -24,7 +37,7 @@ export class MyComponent {
           classTag = "nav-link active";
           bool = "true";
         }
-        return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#"> {name} </a> </li>
+        return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.changeOrg}> {name} </a> </li>
       })}
       </ul>,
 
