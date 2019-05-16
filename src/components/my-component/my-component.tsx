@@ -6,32 +6,21 @@ import { Component, Prop } from '@stencil/core';
   shadow: true
 })
 export class MyComponent {
-  /**
-   * The first name
-   */
+  private orgSelected:string="premier";
+
   @Prop() org_names: string;
-
-  /**
-   * The middle name
-   */
-  @Prop() middle: string;
-
-  /**
-   * The last name
-   */
-  @Prop() last: string;
+  @Prop() height_svg: number;
+  @Prop() with_svg: number;
 
   render() {
     let tabOrgName = this.org_names.split("&");
-    console.log(tabOrgName);
-
     return ([
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
 
       <ul class="nav nav-tabs" id="myTab" role="tablist">
       {tabOrgName.map(name => {
         let classTag: string="nav-link", bool: string="false";
-        if (name == "premier") {
+        if (name == this.orgSelected) {
           classTag = "nav-link active";
           bool = "true";
         }

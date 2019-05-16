@@ -13,32 +13,14 @@ import '@stencil/core';
 export namespace Components {
 
   interface GenomicCard {
-    /**
-    * The last name
-    */
-    'last': string;
-    /**
-    * The middle name
-    */
-    'middle': string;
-    /**
-    * The first name
-    */
+    'height_svg': number;
     'org_names': string;
+    'with_svg': number;
   }
   interface GenomicCardAttributes extends StencilHTMLAttributes {
-    /**
-    * The last name
-    */
-    'last'?: string;
-    /**
-    * The middle name
-    */
-    'middle'?: string;
-    /**
-    * The first name
-    */
+    'height_svg'?: number;
     'org_names'?: string;
+    'with_svg'?: number;
   }
 }
 
