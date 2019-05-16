@@ -14,10 +14,6 @@ export namespace Components {
 
   interface GenomicCard {
     /**
-    * The first name
-    */
-    'first': string;
-    /**
     * The last name
     */
     'last': string;
@@ -25,12 +21,12 @@ export namespace Components {
     * The middle name
     */
     'middle': string;
-  }
-  interface GenomicCardAttributes extends StencilHTMLAttributes {
     /**
     * The first name
     */
-    'first'?: string;
+    'org_names': string;
+  }
+  interface GenomicCardAttributes extends StencilHTMLAttributes {
     /**
     * The last name
     */
@@ -39,6 +35,10 @@ export namespace Components {
     * The middle name
     */
     'middle'?: string;
+    /**
+    * The first name
+    */
+    'org_names'?: string;
   }
 }
 
