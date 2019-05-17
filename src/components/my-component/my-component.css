@@ -1,1 +1,9 @@
+.genomeGraph svg{
+  background-color: #af2d2d;
+}
 
+.select-menu{
+  width: 200px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
