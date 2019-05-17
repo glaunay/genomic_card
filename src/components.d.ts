@@ -13,11 +13,13 @@ import '@stencil/core';
 export namespace Components {
 
   interface GenomicCard {
+    'genomCard': string;
     'height_svg': number;
     'org_names': string;
     'with_svg': number;
   }
   interface GenomicCardAttributes extends StencilHTMLAttributes {
+    'genomCard'?: string;
     'height_svg'?: number;
     'org_names'?: string;
     'with_svg'?: number;

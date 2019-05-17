@@ -7,7 +7,9 @@ import { Component, Prop } from '@stencil/core';
 })
 export class MyComponent {
 // *************************** PROPERTY & CONSTRUCTOR ***************************
-  private orgSelected:string="premier";
+  private orgSelected:string;
+  // TEST
+  @Prop({mutable: true}) genomCard: string="Je suis le premier genome";
 
   @Prop() org_names: string;
   @Prop() height_svg: number;
@@ -19,14 +21,22 @@ export class MyComponent {
 
 
 // *************************** CLICK ***************************
-  changeOrg() {
-    console.log("Changement");
+  changeOrg(event: Event) {
+    let listCards = {"premier": "Je suis le premier genome",
+                         "deuxieme" : "Je suis le second genome",
+                         "troisieme": "Je suis le troisieme genome"};
+    this.orgSelected= (event.currentTarget as HTMLElement).innerText;
+    console.log(`CLICK on ${this.orgSelected}`);
+    this.genomCard = listCards[this.orgSelected];
   }
 
 
 // *************************** DISPLAY ***************************
   render() {
+    console.log("render called");
     let tabOrgName = this.org_names.split("&");
+    if (this.orgSelected == undefined) this.orgSelected = tabOrgName[0];
+
     return ([
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
 
@@ -42,7 +52,7 @@ export class MyComponent {
       </ul>,
 
       <div class="tab-content genomeGraph" id="myTabContent">
-        Ici se trouve la carte du genome selectionne
+        {this.genomCard}
       </div>,
 
       <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>,
@@ -51,12 +61,3 @@ export class MyComponent {
 ])
   }
 }
-// <li class="nav-item">
-// <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
-// </li>
-// <li class="nav-item">
-//   <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Profile</a>
-// </li>
-// <li class="nav-item">
-//   <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Contact</a>
-// </li>
