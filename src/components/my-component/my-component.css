@@ -1,9 +1,18 @@
-.genomeGraph svg{
+/* .genomeGraph svg{
   background-color: #af2d2d;
-}
+} */
 
 .select-menu{
   width: 200px;
   margin-top: 15px;
   margin-bottom: 15px;
+}
+
+.chart div {
+  font: 18px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: red;
 }

@@ -17,7 +17,9 @@
     "test.watch": "stencil test --spec --e2e --watchAll"
   },
   "dependencies": {
-    "bootstrap": "^4.3.1"
+    "@types/d3": "^5.7.2",
+    "bootstrap": "^4.3.1",
+    "d3": "^5.9.2"
   },
   "devDependencies": {
     "@stencil/core": "~0.16.2"
