@@ -40,9 +40,10 @@ export class MyComponent {
 
   componentDidLoad() {
     console.log("Loaded")
-    var start=90, stop=110, sizeGenome=200;
+    var start=90, stop=110, start2=10, stop2=30, sizeGenome=200;
     let data = [
-      {startAngle: 2*Math.PI * start * (1/sizeGenome), endAngle: 2*Math.PI * stop * (1/sizeGenome), 'sgRNA': 'ACACCTGTCAGTAGCGATCGGG', 'start': start, 'stop': stop}
+      {startAngle: 2*Math.PI * start * (1/sizeGenome), endAngle: 2*Math.PI * stop * (1/sizeGenome), 'sgRNA': 'ACACCTGTCAGTAGCGATCGGG', 'start': start, 'stop': stop},
+      {startAngle: 2*Math.PI * start2 * (1/sizeGenome), endAngle: 2*Math.PI * stop2 * (1/sizeGenome), 'sgRNA': 'AAAACTGTCAGTAGCAAAAGG', 'start': start2, 'stop': stop2}
     ];
 
     let arcGenerator = d3.arc();
