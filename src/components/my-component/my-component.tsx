@@ -42,7 +42,7 @@ export class MyComponent {
     console.log("Loaded")
     var start=90, stop=110, sizeGenome=200;
     let data = [
-      {startAngle: 2*Math.PI * start * (1/sizeGenome), endAngle: 2*Math.PI * stop * (1/sizeGenome), 'sgRNA': 'ACACGG', 'start': start, 'stop': stop}
+      {startAngle: 2*Math.PI * start * (1/sizeGenome), endAngle: 2*Math.PI * stop * (1/sizeGenome), 'sgRNA': 'ACACCTGTCAGTAGCGATCGGG', 'start': start, 'stop': stop}
     ];
 
     let arcGenerator = d3.arc();
@@ -85,7 +85,8 @@ export class MyComponent {
         div.transition()
           .duration(500)
           .style('opacity', '.9');
-        div.html('<b>' + d.sgRNA + '</b></br>' + 'Start : ' + d.start + '</br>' + 'Stop : ' + d.stop)
+        div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="fas fa-play"></i> &nbsp; Start : ' + d.start + '</br>' +
+                 ' &nbsp;&nbsp; <i class="fas fa-hand-paper"></i> &nbsp; Stop : ' + d.stop)
           .style('left', (d3.event.pageX) + 'px')
           .style('top', (d3.event.pageY) + 'px');
       })
@@ -116,7 +117,7 @@ export class MyComponent {
 
     return ([
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
-
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous"/>,
       <ul class="nav nav-tabs" id="myTab" role="tablist">
       {tabOrgName.map(name => {
         let classTag: string="nav-link", bool: string="false";
