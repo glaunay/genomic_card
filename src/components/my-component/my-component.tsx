@@ -38,7 +38,7 @@ export class MyComponent {
     console.log((event.currentTarget as HTMLOptionElement).value);
   }
 
-  componentDidLoad() {
+  componentDidUpdate() {
     console.log("Loaded")
     var start=90, stop=110, start2=10, stop2=30, sizeGenome=200;
     let data = [
