@@ -40,19 +40,67 @@ export class MyComponent {
 
   componentDidLoad() {
     console.log("Loaded")
+    var start=90, stop=110, sizeGenome=200;
     let arcGenerator = d3.arc();
-
-    let pathData = arcGenerator({
+    // Generator arc for the complete genome
+    let pathGenome = arcGenerator({
       startAngle: 0,
-      endAngle: 6.5,
+      endAngle: 2 * Math.PI,
       innerRadius: 190,
       outerRadius: 200
     })
+    // Div for the box containing coordinates
+    let div = d3.select('body')
+    .append('div')
+    .attr('class', 'tooltip')
+    .style('opacity', 0);
+    // Generator arc for one sgRNA
+    let pathSgRNA = arcGenerator({
+      startAngle: 2*Math.PI * start * (1/sizeGenome),
+      endAngle: 2*Math.PI * stop * (1/sizeGenome),
+      innerRadius: 205,
+      outerRadius: 210
+    })
 
+
+    // Draw the complete genome
     d3.select("g")
       .append('path')
-      .attr('d', pathData);
+      .attr('d', pathGenome);
 
+
+    // Draw sgRNA
+    d3.select('svg')
+      .append('g')
+      .append('path')
+      // Draw and add animation for sgRNA
+      .each(arcFunction)
+      .style('fill', 'orange')
+      // When mouse is over the sgRNA, show the box
+      .on('mouseover', () => {
+        div.transition()
+          .duration(500)
+          .style('opacity', '.9');
+        div.html("BOUHHHH")
+          .style('left', (d3.event.pageX) + 'px')
+          .style('top', (d3.event.pageY) + 'px');
+      })
+      // When mouse is out, hide the box
+      .on('mouseout', () => {
+        div.transition()
+          .duration(500)
+          .style('opacity', 0);
+      })
+      ;
+      // The animation to place sgRNA
+      function arcFunction(){
+        return d3.select(this)
+                .transition()
+                  .ease(d3.easeBackInOut)
+                  .duration(600)
+                  .attr('d', pathSgRNA)
+                  .attr('transform', 'translate(400, 240)')
+      }
   }
 
 // *************************** DISPLAY ***************************
@@ -87,7 +135,8 @@ export class MyComponent {
           {this.genomCard}
         </p>
         <svg width={this.width_svg} height={this.height_svg}>
-          <g transform="translate(400, 210)"></g>
+          <text transform="translate(385, 250)"> Size </text>
+          <g transform="translate(400, 240)"></g>
         </svg>
       </div>,
       <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>,
