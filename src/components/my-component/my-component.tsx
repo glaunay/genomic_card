@@ -41,6 +41,10 @@ export class MyComponent {
   componentDidLoad() {
     console.log("Loaded")
     var start=90, stop=110, sizeGenome=200;
+    let data = [
+      {startAngle: 2*Math.PI * start * (1/sizeGenome), endAngle: 2*Math.PI * stop * (1/sizeGenome), 'sgRNA': 'ACACGG', 'start': start, 'stop': stop}
+    ];
+
     let arcGenerator = d3.arc();
     // Generator arc for the complete genome
     let pathGenome = arcGenerator({
@@ -55,12 +59,9 @@ export class MyComponent {
     .attr('class', 'tooltip')
     .style('opacity', 0);
     // Generator arc for one sgRNA
-    let pathSgRNA = arcGenerator({
-      startAngle: 2*Math.PI * start * (1/sizeGenome),
-      endAngle: 2*Math.PI * stop * (1/sizeGenome),
-      innerRadius: 205,
-      outerRadius: 210
-    })
+    let pathSgRNA = d3.arc()
+      .innerRadius(205)
+      .outerRadius(210);
 
 
     // Draw the complete genome
@@ -72,16 +73,19 @@ export class MyComponent {
     // Draw sgRNA
     d3.select('svg')
       .append('g')
+      .selectAll('path')
+      .data(data)
+      .enter()
       .append('path')
       // Draw and add animation for sgRNA
       .each(arcFunction)
       .style('fill', 'orange')
       // When mouse is over the sgRNA, show the box
-      .on('mouseover', () => {
+      .on('mouseover', (d) => {
         div.transition()
           .duration(500)
           .style('opacity', '.9');
-        div.html("BOUHHHH")
+        div.html('<b>' + d.sgRNA + '</b></br>' + 'Start : ' + d.start + '</br>' + 'Stop : ' + d.stop)
           .style('left', (d3.event.pageX) + 'px')
           .style('top', (d3.event.pageY) + 'px');
       })
