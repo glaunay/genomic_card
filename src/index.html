@@ -5,11 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
   <title>Stencil Component Starter</title>
   <script src="/build/mycomponent.js"></script>
+  <script src="http://localhost:8080/socket.io/socket.io.js"></script>
 
 </head>
 <body>
 
   <genomic-card org_names="premier&deuxieme&troisieme" height_svg=500 width_svg=800></genomic-card>
 
+
+  <script type="text/javascript" charset="utf-8">
+    console.log("Je suis dans Index.html");
+    var socket = io.connect('http://127.0.0.1:8080');
+
+    console.log(socket);//3002
+    socket.on('connect', function() {
+      console.log('connected');
+      socket.emit('clientConnection', {data: 'I\'m connected!'});
+    });
+    socket.emit('needFile');
+
+    socket.on('loadFile', (results) => {
+      console.log("Fichier chargé et reçu");
+      console.log(results.data)
+
+      document.getElementsByTagName('genomic-card')[0].setAttribute('all_data', results.data);
+    })
+  </script>
 </body>
 </html>
