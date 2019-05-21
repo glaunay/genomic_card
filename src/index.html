@@ -26,7 +26,7 @@
 
     socket.on('loadFile', (results) => {
       console.log("Fichier chargé et reçu");
-      console.log(results.data)
+      console.log(results.data[0])
 
       document.getElementsByTagName('genomic-card')[0].setAttribute('all_data', results.data);
     })
