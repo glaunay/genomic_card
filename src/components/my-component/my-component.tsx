@@ -42,8 +42,8 @@ export class MyComponent {
     console.log("Loaded")
     var start=90, stop=110, start2=10, stop2=30, sizeGenome=200;
     let data = [
-      {startAngle: 2*Math.PI * start * (1/sizeGenome), endAngle: 2*Math.PI * stop * (1/sizeGenome), 'sgRNA': 'ACACCTGTCAGTAGCGATCGGG', 'start': start, 'stop': stop},
-      {startAngle: 2*Math.PI * start2 * (1/sizeGenome), endAngle: 2*Math.PI * stop2 * (1/sizeGenome), 'sgRNA': 'AAAACTGTCAGTAGCAAAAGG', 'start': start2, 'stop': stop2}
+      {'sgRNA': 'ACACCTGTCAGTAGCGATCGGG', 'start': start, 'end': stop},
+      {'sgRNA': 'AAAACTGTCAGTAGCAAAAGG', 'start': start2, 'end': stop2}
     ];
 
     let arcGenerator = d3.arc();
@@ -87,7 +87,7 @@ export class MyComponent {
           .duration(500)
           .style('opacity', '.9');
         div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="fas fa-play"></i> &nbsp; Start : ' + d.start + '</br>' +
-                 ' &nbsp;&nbsp; <i class="fas fa-hand-paper"></i> &nbsp; Stop : ' + d.stop)
+                 ' &nbsp;&nbsp; <i class="fas fa-hand-paper"></i> &nbsp; Stop : ' + d.end)
           .style('left', (d3.event.pageX) + 'px')
           .style('top', (d3.event.pageY) + 'px');
       })
@@ -99,7 +99,9 @@ export class MyComponent {
       })
       ;
       // The animation to place sgRNA
-      function arcFunction(){
+      function arcFunction(data){
+        data.startAngle = 2*Math.PI * data.start * (1/sizeGenome);
+        data.endAngle = 2*Math.PI * data.end * (1/sizeGenome);
         return d3.select(this)
                 .transition()
                   .ease(d3.easeBackInOut)
