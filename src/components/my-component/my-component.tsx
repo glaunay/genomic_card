@@ -117,35 +117,43 @@ export class MyComponent {
     let tabOrgName = this.org_names.split("&");
     if (this.orgSelected == undefined) this.orgSelected = tabOrgName[0];
     if (this.refSelected == undefined) this.refSelected = this.genomeRef[0];
+    // let displayLoad = 'block', displayGenomeCard = 'none';
+    let styleDisplay = (this.orgSelected == undefined) ? ['block', 'none'] : ['none', 'block'];
+    let displayLoad=styleDisplay[0], displayGenomeCard=styleDisplay[1];
 
     return ([
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous"/>,
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
-      {tabOrgName.map(name => {
-        let classTag: string="nav-link", bool: string="false";
-        if (name == this.orgSelected) {
-          classTag = "nav-link active";
-          bool = "true";
-        }
-        return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.changeOrg}> {name} </a> </li>
-      })}
-      </ul>,
+      <div class="spinner-border text-info" role="status" style={{display: displayLoad}}>
+        <span class="sr-only">Loading...</span>
+      </div>,
+      <div class="main-genome-card" style={{display: displayGenomeCard}}>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+        {tabOrgName.map(name => {
+          let classTag: string="nav-link", bool: string="false";
+          if (name == this.orgSelected) {
+            classTag = "nav-link active";
+            bool = "true";
+          }
+          return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.changeOrg}> {name} </a> </li>
+        })}
+        </ul>
 
-      <div class="tab-content genomeGraph" id="myTabContent" >
-        <div class="select-menu">
-          <select class="custom-select" onChange={e => this.handleChangeRef(e)}>
-            {this.genomeRef.map(ref => <option>{ref}</option>)}
-          </select>
+        <div class="tab-content genomeGraph" id="myTabContent" >
+          <div class="select-menu">
+            <select class="custom-select" onChange={e => this.handleChangeRef(e)}>
+              {this.genomeRef.map(ref => <option>{ref}</option>)}
+            </select>
+          </div>
+
+          <p>
+            {this.genomCard}
+          </p>
+          <svg width={this.width_svg} height={this.height_svg}>
+            <text transform="translate(385, 250)"> Size </text>
+            <g transform="translate(400, 240)"></g>
+          </svg>
         </div>
-
-        <p>
-          {this.genomCard}
-        </p>
-        <svg width={this.width_svg} height={this.height_svg}>
-          <text transform="translate(385, 250)"> Size </text>
-          <g transform="translate(400, 240)"></g>
-        </svg>
       </div>,
       <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>,
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>,
