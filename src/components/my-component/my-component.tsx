@@ -1,4 +1,4 @@
-import { Component, Prop } from '@stencil/core';
+import { Component, Prop, State } from '@stencil/core';
 import * as d3 from "d3";
 
 @Component({
@@ -8,8 +8,8 @@ import * as d3 from "d3";
 })
 export class MyComponent {
 // *************************** PROPERTY & CONSTRUCTOR ***************************
-  private orgSelected:string;
-  private refSelected:string;
+  @State() orgSelected:string;
+  @State() refSelected:string;
   // TEST
   @Prop({mutable: true}) genomCard: string="Je suis le premier genome";
   @Prop({mutable: true}) genomeRef= ["Chromosome1", "Chromosome2", "Chromosome3"];
@@ -17,6 +17,10 @@ export class MyComponent {
   @Prop() org_names: string;
   @Prop() height_svg: number;
   @Prop() width_svg: number;
+  @Prop() all_data: string;
+
+  @State() show_data: string;
+
 
   constructor() {
     this.changeOrg = this.changeOrg.bind(this);
@@ -118,14 +122,15 @@ export class MyComponent {
     if (this.orgSelected == undefined) this.orgSelected = tabOrgName[0];
     if (this.refSelected == undefined) this.refSelected = this.genomeRef[0];
     // let displayLoad = 'block', displayGenomeCard = 'none';
-    let styleDisplay = (this.orgSelected == undefined) ? ['block', 'none'] : ['none', 'block'];
+    let styleDisplay = (this.all_data == undefined) ? ['block', 'none'] : ['none', 'block'];
     let displayLoad=styleDisplay[0], displayGenomeCard=styleDisplay[1];
 
     return ([
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous"/>,
-      <div class="spinner-border text-info" role="status" style={{display: displayLoad}}>
-        <span class="sr-only">Loading...</span>
+      <div style={{display: displayLoad}}>
+        <strong> Loading ... </strong>
+        <div class="spinner-grow text-info" role="status"></div>
       </div>,
       <div class="main-genome-card" style={{display: displayGenomeCard}}>
         <ul class="nav nav-tabs" id="myTab" role="tablist">

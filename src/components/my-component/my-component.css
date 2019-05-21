@@ -31,7 +31,7 @@ div.tooltip {
 }
 
 /*  The loader Spinner */
-.spinner-border {
+.spinner-grow {
   width: 150px !important;
   height: 150px !important;
 }
