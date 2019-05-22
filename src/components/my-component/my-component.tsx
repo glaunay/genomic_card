@@ -15,6 +15,7 @@ export class MyComponent {
   @State() orgSelected:string;
   @State() refSelected:string;
   @State() sgrnaSelected:string;
+  @State() sizeSelected:number=3000000;
 
   @Prop() org_names: string;
   @Prop() height_svg: number;
@@ -47,6 +48,7 @@ export class MyComponent {
     console.log(this.sgrnaSelected == '')
   }
 
+// *************************** GENOMIC CARD ***************************
   componentDidLoad() {
     DisplayGenome();
   }
@@ -56,7 +58,7 @@ export class MyComponent {
     if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
 
     console.log("Loaded")
-    var sizeGenome=200000;
+    var sizeGenome = this.sizeSelected;
     let data = [];
     let data_shown = this.show_data[this.sgrnaSelected]
     for (var i in data_shown) {
@@ -120,6 +122,7 @@ export class MyComponent {
       }
   }
 
+
 // *************************** DISPLAY ***************************
   render() {
     console.log("render called");
@@ -139,7 +142,9 @@ export class MyComponent {
 
 
     return ([
+      // @ts-ignore
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />,
+      // @ts-ignore
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous" />,
       <div style={{display: displayLoad}}>
         <strong> Loading ... </strong>
@@ -159,12 +164,14 @@ export class MyComponent {
 
         <div class="tab-content genomeGraph" id="myTabContent" >
           <div class="select-menu">
+            <span>References</span>
             <select class="custom-select" onChange={e => this.handleChangeRef(e)}>
               {this.genomeRef.map(ref => <option>{ref}</option>)}
             </select>
           </div>
 
           <div class="select-menu">
+            <span>sgRNA</span>
             <select class="custom-select" onChange={e => this.handleChangeSgrna(e)}>
               <option>  </option>
               {this.allSgrna.map(sgRna => <option>{sgRna}</option>)}
@@ -172,8 +179,7 @@ export class MyComponent {
           </div>
 
           <svg width={this.width_svg} height={this.height_svg}>
-            <text transform="translate(385, 250)"> Size </text>
-
+            <text transform= 'translate(370, 250)'> {this.sizeSelected} pb </text>
           </svg>
         </div>
       </div>,
@@ -184,6 +190,7 @@ export class MyComponent {
   }
 }
 
+// Display the entire blue circle
 function DisplayGenome () {
   // Clean all arc
   d3.selectAll('g').remove();
@@ -200,5 +207,6 @@ function DisplayGenome () {
     .append("g")
     .append('path')
     .attr('d', pathGenome)
-    .attr('transform', 'translate(400, 240)');
+    .attr('transform', 'translate(400, 240)')
+    .style('fill', 'steelblue');
 }
