@@ -14,16 +14,12 @@ export namespace Components {
 
   interface GenomicCard {
     'all_data': string;
-    'genomCard': string;
-    'genomeRef': any;
     'height_svg': number;
     'org_names': string;
     'width_svg': number;
   }
   interface GenomicCardAttributes extends StencilHTMLAttributes {
     'all_data'?: string;
-    'genomCard'?: string;
-    'genomeRef'?: any;
     'height_svg'?: number;
     'org_names'?: string;
     'width_svg'?: number;
