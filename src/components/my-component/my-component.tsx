@@ -8,56 +8,62 @@ import * as d3 from "d3";
 })
 export class MyComponent {
 // *************************** PROPERTY & CONSTRUCTOR ***************************
+  @State() show_data: string;
+  @State() allSgrna: string[];
+  @State() genomeRef: string[];
+
   @State() orgSelected:string;
   @State() refSelected:string;
-  // TEST
-  @Prop({mutable: true}) genomCard: string="Je suis le premier genome";
-  @Prop({mutable: true}) genomeRef= ["Chromosome1", "Chromosome2", "Chromosome3"];
+  @State() sgrnaSelected:string;
 
   @Prop() org_names: string;
   @Prop() height_svg: number;
   @Prop() width_svg: number;
   @Prop() all_data: string;
 
-  @State() show_data: string;
-
 
   constructor() {
     this.changeOrg = this.changeOrg.bind(this);
     this.handleChangeRef = this.handleChangeRef.bind(this);
+    this.handleChangeSgrna = this.handleChangeSgrna.bind(this);
   }
 
 
 // *************************** CLICK ***************************
   changeOrg(event: Event) {
-    let listCards = {"premier": "Je suis le premier genome",
-                         "deuxieme" : "Je suis le second genome",
-                         "troisieme": "Je suis le troisieme genome"};
     this.orgSelected= (event.currentTarget as HTMLElement).innerText;
+    this.refSelected = undefined;
     console.log(`CLICK on ${this.orgSelected}`);
-    this.genomCard = listCards[this.orgSelected];
   }
 
   handleChangeRef(event: Event) {
+    this.refSelected = (event.currentTarget as HTMLOptionElement).value;
     console.log((event.currentTarget as HTMLOptionElement).value);
   }
 
-  componentDidUpdate() {
-    console.log("Loaded")
-    var start=90, stop=110, start2=10, stop2=30, sizeGenome=200;
-    let data = [
-      {'sgRNA': 'ACACCTGTCAGTAGCGATCGGG', 'start': start, 'end': stop},
-      {'sgRNA': 'AAAACTGTCAGTAGCAAAAGG', 'start': start2, 'end': stop2}
-    ];
+  handleChangeSgrna(event: Event) {
+    this.sgrnaSelected = (event.currentTarget as HTMLOptionElement).value;
+    console.log((event.currentTarget as HTMLOptionElement).value);
+    console.log(this.sgrnaSelected == '')
+  }
+  componentDidLoad() {
+    DisplayGenome();
+  }
 
-    let arcGenerator = d3.arc();
-    // Generator arc for the complete genome
-    let pathGenome = arcGenerator({
-      startAngle: 0,
-      endAngle: 2 * Math.PI,
-      innerRadius: 190,
-      outerRadius: 200
-    })
+  componentDidUpdate() {
+    DisplayGenome();
+    if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
+
+    console.log("Loaded")
+    var sizeGenome=2000;
+    let data = [];
+    let data_shown = this.show_data[this.sgrnaSelected]
+    for (var i in data_shown) {
+      data[i] = {}
+      data[i].direction = data_shown[i].match('[+-]')[0];
+      data[i].start = /\(([0-9]*),/.exec(data_shown[i])[1];
+      data[i].sgRNA = this.sgrnaSelected;
+    }
     // Div for the box containing coordinates
     let div = d3.select('body')
     .append('div')
@@ -66,14 +72,7 @@ export class MyComponent {
     // Generator arc for one sgRNA
     let pathSgRNA = d3.arc()
       .innerRadius(205)
-      .outerRadius(210);
-
-
-    // Draw the complete genome
-    d3.select("g")
-      .append('path')
-      .attr('d', pathGenome);
-
+      .outerRadius(1300);
 
     // Draw sgRNA
     d3.select('svg')
@@ -84,14 +83,15 @@ export class MyComponent {
       .append('path')
       // Draw and add animation for sgRNA
       .each(arcFunction)
-      .style('fill', 'orange')
+      .style('fill', 'red')
       // When mouse is over the sgRNA, show the box
       .on('mouseover', (d) => {
         div.transition()
           .duration(500)
           .style('opacity', '.9');
-        div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="fas fa-play"></i> &nbsp; Start : ' + d.start + '</br>' +
-                 ' &nbsp;&nbsp; <i class="fas fa-hand-paper"></i> &nbsp; Stop : ' + d.end)
+        div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="fas fa-map-signs"></i> &nbsp; Direction : ' + d.direction + '</br>' +
+                 ' &nbsp;&nbsp; <i class="fas fa-play"></i> &nbsp; Start : ' + d.start + '</br>' +
+                 ' &nbsp;&nbsp; <i class="fas fa-hand-paper"></i> &nbsp; Stop : ' + (+d.sgRNA.length + +d.start))
           .style('left', (d3.event.pageX) + 'px')
           .style('top', (d3.event.pageY) + 'px');
       })
@@ -102,10 +102,13 @@ export class MyComponent {
           .style('opacity', 0);
       })
       ;
+      // Add the arc for the sgRNA
       // The animation to place sgRNA
-      function arcFunction(data){
-        data.startAngle = 2*Math.PI * data.start * (1/sizeGenome);
-        data.endAngle = 2*Math.PI * data.end * (1/sizeGenome);
+      function arcFunction(datum){
+        let end: number = +datum.sgRNA.length + +datum.start;
+        datum.startAngle = 2*Math.PI * datum.start * (1/sizeGenome);
+        datum.endAngle = 2*Math.PI * end * (1/sizeGenome);
+        console.log(datum.start + '    FIN:    ' + end);
         return d3.select(this)
                 .transition()
                   .ease(d3.easeBackInOut)
@@ -120,14 +123,22 @@ export class MyComponent {
     console.log("render called");
     let tabOrgName = this.org_names.split("&");
     if (this.orgSelected == undefined) this.orgSelected = tabOrgName[0];
-    if (this.refSelected == undefined) this.refSelected = this.genomeRef[0];
-    // let displayLoad = 'block', displayGenomeCard = 'none';
+
     let styleDisplay = (this.all_data == undefined) ? ['block', 'none'] : ['none', 'block'];
     let displayLoad=styleDisplay[0], displayGenomeCard=styleDisplay[1];
+    let all_data = JSON.parse(this.all_data);
+
+    this.genomeRef = Object.keys(all_data[this.orgSelected]);
+    if (this.refSelected == undefined) this.refSelected = this.genomeRef[0];
+    this.show_data = all_data[this.orgSelected][this.refSelected];
+    this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+    console.log('Selected organism : ' + this.orgSelected)
+    console.log(this.show_data)
+
 
     return ([
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
-      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous"/>,
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />,
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous" />,
       <div style={{display: displayLoad}}>
         <strong> Loading ... </strong>
         <div class="spinner-grow text-info" role="status"></div>
@@ -151,12 +162,16 @@ export class MyComponent {
             </select>
           </div>
 
-          <p>
-            {this.genomCard}
-          </p>
+          <div class="select-menu">
+            <select class="custom-select" onChange={e => this.handleChangeSgrna(e)}>
+              <option>  </option>
+              {this.allSgrna.map(sgRna => <option>{sgRna}</option>)}
+            </select>
+          </div>
+
           <svg width={this.width_svg} height={this.height_svg}>
             <text transform="translate(385, 250)"> Size </text>
-            <g transform="translate(400, 240)"></g>
+
           </svg>
         </div>
       </div>,
@@ -165,4 +180,23 @@ export class MyComponent {
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 ])
   }
+}
+
+function DisplayGenome () {
+  // Clean all arc
+  d3.selectAll('g').remove();
+  let arcGenerator = d3.arc();
+  // Generator arc for the complete genome
+  let pathGenome = arcGenerator({
+    startAngle: 0,
+    endAngle: 2 * Math.PI,
+    innerRadius: 190,
+    outerRadius: 200
+  })
+  // Draw the complete genome
+  d3.select('svg')
+    .append("g")
+    .append('path')
+    .attr('d', pathGenome)
+    .attr('transform', 'translate(400, 240)');
 }
