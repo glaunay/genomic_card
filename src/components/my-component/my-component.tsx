@@ -46,6 +46,7 @@ export class MyComponent {
     console.log((event.currentTarget as HTMLOptionElement).value);
     console.log(this.sgrnaSelected == '')
   }
+
   componentDidLoad() {
     DisplayGenome();
   }
@@ -55,7 +56,7 @@ export class MyComponent {
     if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
 
     console.log("Loaded")
-    var sizeGenome=2000;
+    var sizeGenome=200000;
     let data = [];
     let data_shown = this.show_data[this.sgrnaSelected]
     for (var i in data_shown) {
@@ -72,7 +73,7 @@ export class MyComponent {
     // Generator arc for one sgRNA
     let pathSgRNA = d3.arc()
       .innerRadius(205)
-      .outerRadius(1300);
+      .outerRadius(220);
 
     // Draw sgRNA
     d3.select('svg')
@@ -107,8 +108,9 @@ export class MyComponent {
       function arcFunction(datum){
         let end: number = +datum.sgRNA.length + +datum.start;
         datum.startAngle = 2*Math.PI * datum.start * (1/sizeGenome);
-        datum.endAngle = 2*Math.PI * end * (1/sizeGenome);
-        console.log(datum.start + '    FIN:    ' + end);
+        let endAngle = 2*Math.PI * end * (1/sizeGenome)  ;
+        datum.endAngle = (Math.abs(endAngle - datum.startAngle) < 0.01) ? endAngle + 0.01 : endAngle;
+        console.log(datum.startAngle + '    FIN:    ' + datum.endAngle);
         return d3.select(this)
                 .transition()
                   .ease(d3.easeBackInOut)
