@@ -1,22 +1,17 @@
+/*  Selector to choose reference and sgRNA */
 .select-menu{
   width: 200px;
   margin-top: 15px;
   margin-bottom: 15px;
+  margin-left: 5px;
 }
 
-.chart div {
-  font: 18px sans-serif;
-  background-color: steelblue;
-  text-align: right;
-  padding: 3px;
-  margin: 1px;
-  color: red;
+.select-menu span {
+  margin-left: 10px;
+  font-weight: bold;
 }
 
-path {
-  fill: steelblue;
-}
-
+/*  Tooltip for coordinates*/
 div.tooltip {
     position: absolute;
     text-align: left;
