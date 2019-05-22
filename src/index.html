@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <genomic-card org_names="premier&deuxieme&troisieme" height_svg=500 width_svg=800></genomic-card>
+  <genomic-card org_names="Buchnera aphidicola (Cinara tujafilina) GCF_000217635.1&Aliivibrio wodanis GCF_000953695.1" height_svg=500 width_svg=800></genomic-card>
 
 
   <script type="text/javascript" charset="utf-8">
@@ -26,9 +26,7 @@
 
     socket.on('loadFile', (results) => {
       console.log("Fichier chargé et reçu");
-      console.log(results.data[0])
-
-      document.getElementsByTagName('genomic-card')[0].setAttribute('all_data', results.data);
+      document.getElementsByTagName('genomic-card')[0].setAttribute('all_data', results);
     })
   </script>
 </body>
