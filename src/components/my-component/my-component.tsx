@@ -1,4 +1,4 @@
-import { Component, Prop, State } from '@stencil/core';
+import { Component, Prop, State, Listen, EventEmitter, Event } from '@stencil/core';
 import * as d3 from "d3";
 
 @Component({
@@ -24,30 +24,53 @@ export class MyComponent {
 
 
   constructor() {
-    this.changeOrg = this.changeOrg.bind(this);
+    this.handleChangeOrg = this.handleChangeOrg.bind(this);
     this.handleChangeRef = this.handleChangeRef.bind(this);
     this.handleChangeSgrna = this.handleChangeSgrna.bind(this);
+    this.emitOrgChange = this.emitOrgChange.bind(this);
+    this.emitRefChange = this.emitRefChange.bind(this);
+    this.emitSgrnaChange = this.emitSgrnaChange.bind(this);
   }
 
 
 // *************************** CLICK ***************************
-  changeOrg(event: Event) {
+  @Listen('changeOrgCard')
+  handleChangeOrg(event: CustomEvent) {
     this.orgSelected= (event.currentTarget as HTMLElement).innerText;
     this.refSelected = undefined;
     console.log(`CLICK on ${this.orgSelected}`);
   }
 
-  handleChangeRef(event: Event) {
+  @Listen('changeRefCard')
+  handleChangeRef(event: CustomEvent) {
     this.refSelected = (event.currentTarget as HTMLOptionElement).value;
     console.log((event.currentTarget as HTMLOptionElement).value);
   }
 
-  handleChangeSgrna(event: Event) {
-    this.sgrnaSelected = (event.currentTarget as HTMLOptionElement).value;
-    console.log((event.currentTarget as HTMLOptionElement).value);
-    console.log(this.sgrnaSelected == '')
+  @Listen('changeSgrnaCard')
+  handleChangeSgrna(event: CustomEvent) {
+    // this.sgrnaSelected = (event.currentTarget as HTMLOptionElement).value;
+    this.sgrnaSelected = event.detail;
+    console.log(event.detail);
   }
 
+  @Event() changeOrgCard: EventEmitter;
+  emitOrgChange(event: Event){
+    let val = (event.currentTarget as HTMLElement).innerText;
+    this.changeSgrnaCard.emit(val);
+  }
+
+  @Event() changeRefCard: EventEmitter;
+  emitRefChange(event: Event){
+    let val = (event.currentTarget as HTMLOptionElement).value;
+    this.changeSgrnaCard.emit(val);
+  }
+
+  @Event() changeSgrnaCard: EventEmitter;
+  emitSgrnaChange(event: Event){
+    let val = (event.currentTarget as HTMLOptionElement).value;
+    this.changeSgrnaCard.emit(val);
+  }
 // *************************** GENOMIC CARD ***************************
   componentDidLoad() {
     DisplayGenome();
@@ -158,21 +181,21 @@ export class MyComponent {
             classTag = "nav-link active";
             bool = "true";
           }
-          return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.changeOrg}> {name} </a> </li>
+          return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.emitOrgChange}> {name} </a> </li>
         })}
         </ul>
 
         <div class="tab-content genomeGraph" id="myTabContent" >
           <div class="select-menu">
             <span>References</span>
-            <select class="custom-select" onChange={e => this.handleChangeRef(e)}>
+            <select class="custom-select" onChange={e => this.emitRefChange(e)}>
               {this.genomeRef.map(ref => <option>{ref}</option>)}
             </select>
           </div>
 
           <div class="select-menu">
             <span>sgRNA</span>
-            <select class="custom-select" onChange={e => this.handleChangeSgrna(e)}>
+            <select class="custom-select" onChange={e => this.emitSgrnaChange(e)}>
               <option>  </option>
               {this.allSgrna.map(sgRna => <option>{sgRna}</option>)}
             </select>

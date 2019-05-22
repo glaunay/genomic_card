@@ -21,6 +21,9 @@ export namespace Components {
   interface GenomicCardAttributes extends StencilHTMLAttributes {
     'all_data'?: string;
     'height_svg'?: number;
+    'onChangeOrgCard'?: (event: CustomEvent) => void;
+    'onChangeRefCard'?: (event: CustomEvent) => void;
+    'onChangeSgrnaCard'?: (event: CustomEvent) => void;
     'org_names'?: string;
     'width_svg'?: number;
   }
