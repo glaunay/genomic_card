@@ -30,3 +30,10 @@ div.tooltip {
   width: 150px !important;
   height: 150px !important;
 }
+
+
+.axisCircles {
+  fill: none;
+  stroke: #E8E8E8;
+  stroke-width: 1px;
+}

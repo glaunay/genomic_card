@@ -175,44 +175,105 @@ export class MyComponent {
 // *************************** DISPLAY ***************************
 
   displayPlot() {
-    var margin = {top: 30, right: 30, bottom: 30, left: 50},
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    ///////////////////////////////////////////////////////////////////////////
+    //////////////////// Set up and initiate svg containers ///////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    var margin = {
+    	top: 70,
+    	right: 20,
+    	bottom: 120,
+    	left: 20
+    };
+    var width = 600 - margin.left - margin.right - 20;
+    var height = 600 - margin.top - margin.bottom - 20;
+
+
     d3.select('#densityPlot')
         .selectAll('g').remove()
+
      let svg = d3.select('#densityPlot')
                   .attr('width', width + margin.left + margin.right)
                   .attr('height', height + margin.top + margin.bottom)
                 .append('g')
                   .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-    let x = d3.scaleLinear()
-              .domain([0, this.sizeSelected])
-              .range([0, width]);
-    svg.append('g')
-       .attr('transform', 'translate(0, ' + height + ')')
-       .call(d3.axisBottom(x));
+    ///////////////////////////////////////////////////////////////////////////
+    //////////////////////////// Create scales ////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    //Set the minimum inner radius and max outer radius of the chart
+    var	outerRadius = Math.min(width, height, 500)/2,
+    	innerRadius = outerRadius * 0.4;
 
-    let y = d3.scaleLinear()
-              .domain([0, 4])
-              .range([height, 0]);
-    svg.append('g')
-       .call(d3.axisLeft(y));
+    //Base the color scale on average temperature extremes
+    // var colorScale = d3.scaleLinear()
+    // 	.domain([-15, 7.5, 30])
+    // 	.range(["#2c7bb6", "#ffff8c", "#d7191c"])
+    // 	.interpolate(d3.interpolateHcl);
+
+    //Scale for the heights of the bar, not starting at zero to give the bars an initial offset outward
+    var barScale = d3.scaleLinear()
+    	.range([innerRadius, outerRadius])
+    	.domain([-15,30]);
+
+    //Scale to turn the date into an angle of 360 degrees in total
+    //With the first datapoint (Jan 1st) on top
+    // var angle = d3.scaleLinear()
+    // 	.range([-180, 180])
+    // 	.domain([0, this.sizeSelected]);
+
+      ///////////////////////////////////////////////////////////////////////////
+      ///////////////////////////// Create Axes /////////////////////////////////
+      ///////////////////////////////////////////////////////////////////////////
+      //Wrapper for the bars and to position it downward
+      var barWrapper = svg.append("g")
+	                        .attr("transform", "translate(" + 0 + "," + 0 + ")");
+
+      //Draw gridlines below the bars
+      var axes = barWrapper.selectAll(".gridCircles")
+                           	.data([-20,-10,0,10,20,30])
+                           	.enter().append("g");
+      //Draw the circles
+      axes.append("circle")
+         	.attr("class", "axisCircles")
+         	.attr("r", function(d) { return barScale(d); });
+          //Draw the axis labels
+      axes.append("text")
+        	.attr("class", "axisText")
+        	.attr("y", function(d) { return barScale(d); })
+        	.attr("dy", "0.3em")
+        	.text(function(d) { return d + "°C"});
+
+      ///////////////////////////////////////////////////////////////////////////
+      ////////////////////////////// Draw bars //////////////////////////////////
+      ///////////////////////////////////////////////////////////////////////////
+
+      //Draw a bar per day were the height is the difference between the minimum and maximum temperature
+      //And the color is based on the mean temperature
+      // barWrapper.selectAll(".tempBar")
+      //  	.data(weatherBoston)
+      //  	.enter().append("rect")
+      //  	.attr("class", "tempBar")
+      //  	.attr("transform", function(d,i) { return "rotate(" + (angle(d.date)) + ")"; })
+      //  	.attr("width", 1.5)
+      // 	.attr("height", function(d,i) { return barScale(d.max_temp) - barScale(d.min_temp); })
+      //  	.attr("x", -0.75)
+      //  	.attr("y", function(d,i) {return barScale(d.min_temp); })
+      //  	.style("fill", function(d) { return colorScale(d.mean_temp); });
 
 
-    svg.append('path')
-       .attr('class', 'mypath')
-       .datum(this.plotArray)
-       .attr('fill', '#69b3a2')
-       .attr('opacity', '.8')
-       .attr('stroke', '#000')
-       .attr('stroke-width', 1)
-       .attr('stroke-linejoin', 'round')
-       .attr('d', d3.line()
-        .curve(d3.curveBasis)
-          .x( (d) => {return x(d[1]);})
-          .y( (d) => {return y(d[0]);})
-        );
+    // svg.append('path')
+    //    .attr('class', 'mypath')
+    //    .datum(this.plotArray)
+    //    .attr('fill', '#69b3a2')
+    //    .attr('opacity', '.8')
+    //    .attr('stroke', '#000')
+    //    .attr('stroke-width', 1)
+    //    .attr('stroke-linejoin', 'round')
+    //    .attr('d', d3.line()
+    //     .curve(d3.curveBasis)
+    //       .x( (d) => {return x(d[1]);})
+    //       .y( (d) => {return y(d[0]);})
+    //     );
   }
 
 
