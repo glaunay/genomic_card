@@ -195,7 +195,7 @@ export class MyComponent {
                   .attr('width', width + margin.left + margin.right)
                   .attr('height', height + margin.top + margin.bottom)
                 .append('g')
-                  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+                  .attr('transform', 'translate(200,200)');
 
     ///////////////////////////////////////////////////////////////////////////
     //////////////////////////// Create scales ////////////////////////////////
@@ -213,14 +213,14 @@ export class MyComponent {
     //Scale for the heights of the bar, not starting at zero to give the bars an initial offset outward
     var barScale = d3.scaleLinear()
     	.range([innerRadius, outerRadius])
-    	.domain([-15,30]);
+    	.domain([0,20]);
 
     //Scale to turn the date into an angle of 360 degrees in total
     //With the first datapoint (Jan 1st) on top
-    // var angle = d3.scaleLinear()
-    // 	.range([-180, 180])
-    // 	.domain([0, this.sizeSelected]);
-
+    var angle = d3.scaleLinear()
+    	.range([-180, 180])
+    	.domain([0, 6]);
+    let test = [[0, 12], [1, 12], [2, 3], [3, 3], [4, 10], [5, 11]];
       ///////////////////////////////////////////////////////////////////////////
       ///////////////////////////// Create Axes /////////////////////////////////
       ///////////////////////////////////////////////////////////////////////////
@@ -230,7 +230,7 @@ export class MyComponent {
 
       //Draw gridlines below the bars
       var axes = barWrapper.selectAll(".gridCircles")
-                           	.data([-20,-10,0,10,20,30])
+                           	.data([0, 5, 10, 15, 20])
                            	.enter().append("g");
       //Draw the circles
       axes.append("circle")
@@ -249,16 +249,16 @@ export class MyComponent {
 
       //Draw a bar per day were the height is the difference between the minimum and maximum temperature
       //And the color is based on the mean temperature
-      // barWrapper.selectAll(".tempBar")
-      //  	.data(weatherBoston)
-      //  	.enter().append("rect")
-      //  	.attr("class", "tempBar")
-      //  	.attr("transform", function(d,i) { return "rotate(" + (angle(d.date)) + ")"; })
-      //  	.attr("width", 1.5)
-      // 	.attr("height", function(d,i) { return barScale(d.max_temp) - barScale(d.min_temp); })
-      //  	.attr("x", -0.75)
-      //  	.attr("y", function(d,i) {return barScale(d.min_temp); })
-      //  	.style("fill", function(d) { return colorScale(d.mean_temp); });
+      barWrapper.selectAll(".tempBar")
+       	.data(test)
+       	.enter().append("rect")
+       	.attr("class", "tempBar")
+       	.attr("transform", function(d) { return "rotate(" + (angle(d[0])) + ")"; })
+       	.attr("width", 1.5)
+      	.attr("height", 10)
+       	.attr("x", -0.75)
+       	.attr("y", function(d) {return barScale(d[1]); })
+       	//.style("fill", function(d) { return colorScale(d.mean_temp); });
 
 
     // svg.append('path')
