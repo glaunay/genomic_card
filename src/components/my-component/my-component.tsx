@@ -8,7 +8,7 @@ import * as d3 from "d3";
 })
 export class MyComponent {
 // *************************** PROPERTY & CONSTRUCTOR ***************************
-  @State() show_data: string;
+  @State() show_data: any;
   @State() allSgrna: string[];
   @State() genomeRef: string[];
 
@@ -16,6 +16,7 @@ export class MyComponent {
   @State() refSelected:string;
   @State() sgrnaSelected:string;
   @State() sizeSelected:number=3000000;
+  @State() plotArray: any;
 
   @Prop() org_names: string;
   @Prop() height_svg: number;
@@ -30,40 +31,40 @@ export class MyComponent {
     this.emitOrgChange = this.emitOrgChange.bind(this);
     this.emitRefChange = this.emitRefChange.bind(this);
     this.emitSgrnaChange = this.emitSgrnaChange.bind(this);
+    this.generatePlot = this.generatePlot.bind(this);
+    this.displayPlot = this.displayPlot.bind(this);
+    this.generateGenomicCard = this.generateGenomicCard.bind(this);
   }
 
 
 // *************************** CLICK ***************************
   @Listen('changeOrgCard')
   handleChangeOrg(event: CustomEvent) {
-    this.orgSelected= (event.currentTarget as HTMLElement).innerText;
+    this.orgSelected= event.detail;
     this.refSelected = undefined;
     console.log(`CLICK on ${this.orgSelected}`);
   }
 
   @Listen('changeRefCard')
   handleChangeRef(event: CustomEvent) {
-    this.refSelected = (event.currentTarget as HTMLOptionElement).value;
-    console.log((event.currentTarget as HTMLOptionElement).value);
+    this.refSelected = event.detail;
   }
 
   @Listen('changeSgrnaCard')
   handleChangeSgrna(event: CustomEvent) {
-    // this.sgrnaSelected = (event.currentTarget as HTMLOptionElement).value;
     this.sgrnaSelected = event.detail;
-    console.log(event.detail);
   }
 
   @Event() changeOrgCard: EventEmitter;
   emitOrgChange(event: Event){
     let val = (event.currentTarget as HTMLElement).innerText;
-    this.changeSgrnaCard.emit(val);
+    this.changeOrgCard.emit(val);
   }
 
   @Event() changeRefCard: EventEmitter;
   emitRefChange(event: Event){
     let val = (event.currentTarget as HTMLOptionElement).value;
-    this.changeSgrnaCard.emit(val);
+    this.changeRefCard.emit(val);
   }
 
   @Event() changeSgrnaCard: EventEmitter;
@@ -71,23 +72,48 @@ export class MyComponent {
     let val = (event.currentTarget as HTMLOptionElement).value;
     this.changeSgrnaCard.emit(val);
   }
+
+  generatePlot() {
+    let plotArray = new Array(this.sizeSelected).fill(0);
+    for (var i in this.show_data) {
+
+      this.show_data[i].forEach(coord => {
+        let start = (/\(([0-9]*),/.exec(coord)[1] as unknown as number);
+        let end = (/,([0-9]*)\)/.exec(coord)[1] as unknown as number);
+
+        plotArray.slice(start -1, end).forEach(function(part, index) {
+          this[index] = part + 1;
+        }, plotArray);
+      })
+    }
+    plotArray.forEach(function(part, index) {
+      this[index] = [part, index + 1];
+    }, plotArray);
+    console.log("******* Plot *******")
+    this.plotArray = plotArray;
+    console.log(plotArray);
+  }
 // *************************** GENOMIC CARD ***************************
   componentDidLoad() {
+    this.newMethod();
+  }
+
+  private newMethod() {
     DisplayGenome();
   }
 
-  componentDidUpdate() {
+  generateGenomicCard() {
     DisplayGenome();
     if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
 
     console.log("Loaded")
     var sizeGenome = this.sizeSelected;
     let data = [];
-    let data_shown = this.show_data[this.sgrnaSelected]
-    for (var i in data_shown) {
+    let dataOneSgrna = this.show_data[this.sgrnaSelected]
+    for (var i in dataOneSgrna) {
       data[i] = {}
-      data[i].direction = data_shown[i].match('[+-]')[0];
-      data[i].start = /\(([0-9]*),/.exec(data_shown[i])[1];
+      data[i].direction = dataOneSgrna[i].match('[+-]')[0];
+      data[i].start = /\(([0-9]*),/.exec(dataOneSgrna[i])[1];
       data[i].sgRNA = this.sgrnaSelected;
     }
     // Div for the box containing coordinates
@@ -147,6 +173,88 @@ export class MyComponent {
 
 
 // *************************** DISPLAY ***************************
+
+  displayPlot() {
+    var margin = {top: 30, right: 30, bottom: 30, left: 50},
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+    d3.select('#densityPlot')
+        .selectAll('g').remove()
+     let svg = d3.select('#densityPlot')
+                  .attr('width', width + margin.left + margin.right)
+                  .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    let x = d3.scaleLinear()
+              .domain([0, this.sizeSelected])
+              .range([0, width]);
+    svg.append('g')
+       .attr('transform', 'translate(0, ' + height + ')')
+       .call(d3.axisBottom(x));
+
+    let y = d3.scaleLinear()
+              .domain([0, 4])
+              .range([height, 0]);
+    svg.append('g')
+       .call(d3.axisLeft(y));
+
+
+    svg.append('path')
+       .attr('class', 'mypath')
+       .datum(this.plotArray)
+       .attr('fill', '#69b3a2')
+       .attr('opacity', '.8')
+       .attr('stroke', '#000')
+       .attr('stroke-width', 1)
+       .attr('stroke-linejoin', 'round')
+       .attr('d', d3.line()
+        .curve(d3.curveBasis)
+          .x( (d) => {return x(d[1]);})
+          .y( (d) => {return y(d[0]);})
+        );
+  }
+
+
+  // displayPlot() {
+  //   var margin = {top: 10, right: 10, bottom: 10, left: 10},
+  //       width = 460 - margin.left - margin.right,
+  //       height = 460 - margin.top - margin.bottom,
+  //       innerRadius = 340,
+  //       outerRadius = Math.min(width, height);
+  //
+  //   d3.select('#densityPlot')
+  //       .selectAll('g').remove()
+  //    let svg = d3.select('#densityPlot')
+  //                 .attr('width', width + margin.left + margin.right)
+  //                 .attr('height', height + margin.top + margin.bottom)
+  //               .append('g')
+  //                 .attr("transform", "translate(" + width / 2 + "," + ( height/2+100 )+ ")"); // Add 100 on Y translation, cause upper bars are longer
+  //
+  //   var x = d3.scaleLinear()
+  //        .range([0, 2 * Math.PI])    // X axis goes from 0 to 2pi = all around the circle. If I stop at 1Pi, it will be around a half circle
+  //        .domain( [0, 6] ); // The domain of the X axis is the list of states.
+  //
+  //  var y = d3.scaleLinear()
+  //        .range([innerRadius, outerRadius])   // Domain will be define later.
+  //        .domain([0, 4]); // Domain of Y is from 0 to the max seen in the data
+  // let test = [[12, 1], [10, 2], [15, 3], [3, 4], [2, 5], [10, 6]];
+  //  svg.append("g")
+  //     .selectAll("path")
+  //     .data(test)
+  //     .enter()
+  //     .append("path")
+  //       .attr("fill", "#69b3a2")
+  //       .attr("d", d3.arc()     // imagine your doing a part of a donut plot
+  //           .innerRadius(innerRadius)
+  //           .outerRadius(function(d) { return y(d[0]); })
+  //           .startAngle(function(d) { return x(d[1]); })
+  //           .endAngle(function(d) { return x(d[1]); })
+  //           .padAngle(0.01)
+  //           .padRadius(innerRadius))
+  // }
+
+
   render() {
     console.log("render called");
     let tabOrgName = this.org_names.split("&");
@@ -160,8 +268,8 @@ export class MyComponent {
     if (this.refSelected == undefined) this.refSelected = this.genomeRef[0];
     this.show_data = all_data[this.orgSelected][this.refSelected];
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
-    console.log('Selected organism : ' + this.orgSelected)
-    console.log(this.show_data)
+
+    if (this.plotArray == undefined) this.generatePlot();
 
 
     return ([
@@ -173,7 +281,14 @@ export class MyComponent {
         <strong> Loading ... </strong>
         <div class="spinner-grow text-info" role="status"></div>
       </div>,
+
+      /* ************************************************************* */
+      /* ************* Main component with menu and card ************* */
+      /* ************************************************************* */
+
+      /* ************* Menu ************* */
       <div class="main-genome-card" style={{display: displayGenomeCard}}>
+         {/* ************* Tab menu *************  */}
         <ul class="nav nav-tabs" id="myTab" role="tablist">
         {tabOrgName.map(name => {
           let classTag: string="nav-link", bool: string="false";
@@ -184,7 +299,7 @@ export class MyComponent {
           return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.emitOrgChange}> {name} </a> </li>
         })}
         </ul>
-
+        {/* ************* Menu for References and sgRNA ************* */}
         <div class="tab-content genomeGraph" id="myTabContent" >
           <div class="select-menu">
             <span>References</span>
@@ -201,9 +316,15 @@ export class MyComponent {
             </select>
           </div>
 
-          <svg width={this.width_svg} height={this.height_svg}>
+           {/* ************* Card *************  */}
+          <svg id='displayGenomicCard' width={this.width_svg} height={this.height_svg}>
+            {this.generateGenomicCard()}
             <text transform= 'translate(370, 250)'> {this.sizeSelected} pb </text>
           </svg>
+
+           {/* ************* Plot *************  */}
+          <svg id='densityPlot'> {this.displayPlot()}</svg>
+
         </div>
       </div>,
       <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>,
@@ -216,7 +337,7 @@ export class MyComponent {
 // Display the entire blue circle
 function DisplayGenome () {
   // Clean all arc
-  d3.selectAll('g').remove();
+  d3.select('#displayGenomicCard').selectAll('g').remove();
   let arcGenerator = d3.arc();
   // Generator arc for the complete genome
   let pathGenome = arcGenerator({
