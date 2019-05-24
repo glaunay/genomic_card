@@ -167,7 +167,7 @@ export class MyComponent {
                   .ease(d3.easeBackInOut)
                   .duration(600)
                   .attr('d', pathSgRNA)
-                  .attr('transform', 'translate(400, 240)')
+                  .attr('transform', 'translate(400, 290)')
       }
   }
 
@@ -178,31 +178,29 @@ export class MyComponent {
     ///////////////////////////////////////////////////////////////////////////
     //////////////////// Set up and initiate svg containers ///////////////////
     ///////////////////////////////////////////////////////////////////////////
-    var margin = {
-    	top: 70,
-    	right: 20,
-    	bottom: 120,
-    	left: 20
-    };
-    var width = 600 - margin.left - margin.right - 20;
-    var height = 600 - margin.top - margin.bottom - 20;
+    // var margin = {
+    // 	top: 70,
+    // 	right: 20,
+    // 	bottom: 120,
+    // 	left: 20
+    // };
+    // var width = 600 - margin.left - margin.right - 20;
+    // var height = 600 - margin.top - margin.bottom - 20;
 
 
     d3.select('#densityPlot')
         .selectAll('g').remove()
 
-     let svg = d3.select('#densityPlot')
-                  .attr('width', width + margin.left + margin.right)
-                  .attr('height', height + margin.top + margin.bottom)
+     let svg = d3.select('#displayGenomicCard')
                 .append('g')
-                  .attr('transform', 'translate(200,200)');
+                  .attr('transform', 'translate(400,290)');
 
     ///////////////////////////////////////////////////////////////////////////
     //////////////////////////// Create scales ////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////
     //Set the minimum inner radius and max outer radius of the chart
-    var	outerRadius = Math.min(width, height, 500)/2,
-    	innerRadius = outerRadius * 0.4;
+    var	outerRadius = 290,
+    	innerRadius = 240;
 
     //Base the color scale on average temperature extremes
     // var colorScale = d3.scaleLinear()
@@ -241,7 +239,7 @@ export class MyComponent {
         	.attr("class", "axisText")
         	.attr("y", function(d) { return barScale(d); })
         	.attr("dy", "0.3em")
-        	.text(function(d) { return d + "°C"});
+        	.text(function(d) { return d });
 
       ///////////////////////////////////////////////////////////////////////////
       ////////////////////////////// Draw bars //////////////////////////////////
@@ -380,7 +378,7 @@ export class MyComponent {
            {/* ************* Card *************  */}
           <svg id='displayGenomicCard' width={this.width_svg} height={this.height_svg}>
             {this.generateGenomicCard()}
-            <text transform= 'translate(370, 250)'> {this.sizeSelected} pb </text>
+            <text transform= 'translate(370, 300)'> {this.sizeSelected} pb </text>
           </svg>
 
            {/* ************* Plot *************  */}
@@ -412,6 +410,6 @@ function DisplayGenome () {
     .append("g")
     .append('path')
     .attr('d', pathGenome)
-    .attr('transform', 'translate(400, 240)')
+    .attr('transform', 'translate(400, 290)')
     .style('fill', 'steelblue');
 }
