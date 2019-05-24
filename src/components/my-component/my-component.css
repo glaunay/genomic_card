@@ -1,3 +1,6 @@
+@import '../../../node_modules/bootstrap/dist/css/bootstrap.css';
+@import '../../../node_modules/font-awesome/css/font-awesome.css';
+
 /*  Selector to choose reference and sgRNA */
 .select-menu{
   width: 200px;
