@@ -42,13 +42,24 @@ export class MyComponent {
   @Listen('changeOrgCard')
   handleChangeOrg(event: CustomEvent) {
     this.orgSelected= event.detail;
-    this.refSelected = undefined;
+    let all_data = JSON.parse(this.all_data);
+    this.genomeRef = Object.keys(all_data[this.orgSelected]);
+    this.refSelected = this.genomeRef[0];
+    this.show_data = all_data[this.orgSelected][this.refSelected];
+    this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+    const test = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
+    console.log(test);
     console.log(`CLICK on ${this.orgSelected}`);
   }
 
   @Listen('changeRefCard')
   handleChangeRef(event: CustomEvent) {
     this.refSelected = event.detail;
+    let all_data = JSON.parse(this.all_data);
+    this.show_data = all_data[this.orgSelected][this.refSelected];
+    this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+    const test = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
+    console.log(test);
   }
 
   @Listen('changeSgrnaCard')
@@ -182,19 +193,26 @@ export class MyComponent {
   render() {
     console.log("render called");
     let tabOrgName = this.org_names.split("&");
-    if (this.orgSelected == undefined) this.orgSelected = tabOrgName[0];
 
-    let styleDisplay = (this.all_data == undefined) ? ['block', 'none'] : ['none', 'block'];
+    let styleDisplay: string[], all_data;
+    if (this.all_data == undefined) {
+      styleDisplay = ['block', 'none'];
+    } else {
+      styleDisplay = ['none', 'block'];
+      all_data = JSON.parse(this.all_data);
+
+      if (this.orgSelected == undefined) {
+        this.orgSelected = tabOrgName[0];
+        this.genomeRef = Object.keys(all_data[this.orgSelected]);
+        this.refSelected = this.genomeRef[0];
+        this.show_data = all_data[this.orgSelected][this.refSelected];
+        this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+
+        this.generatePlot()
+      }
+    }
+
     let displayLoad=styleDisplay[0], displayGenomeCard=styleDisplay[1];
-    let all_data = JSON.parse(this.all_data);
-
-    this.genomeRef = Object.keys(all_data[this.orgSelected]);
-    if (this.refSelected == undefined) this.refSelected = this.genomeRef[0];
-    this.show_data = all_data[this.orgSelected][this.refSelected];
-    this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
-
-    if (this.plotArray == undefined) this.generatePlot();
-
 
     return ([
       <div style={{display: displayLoad}}>
