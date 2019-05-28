@@ -31,22 +31,22 @@ export class TreeClustering {
           // if (min != 0) console.log('MAX : ' + max + '  MIN : ' + min + '  START : ' + start);
         }
       })
-      console.log(tmpCoord.toString() == '');
+      // console.log(tmpCoord.toString() == '');
       if (tmpCoord.toString() != '') sequencesIn[seq] = tmpCoord;
     }
-    console.log('ORIGIN ' + sequences);
-    console.log(sequencesIn);
+    // console.log('ORIGIN ' + sequences);
+    // console.log(sequencesIn);
     return sequencesIn;
   }
 
   constructTree(sizeSector: number, sequences: Object, nbSec: number, minWord: number, niv, minPos: number) {
     let sizeSubSector: number = sizeSector / nbSec;
-    console.log('$$$$$$$$$$$' + sizeSector);
+    // console.log('$$$$$$$$$$$' + sizeSector);
     let listChildren = [];
     for (var i=0; i < nbSec; i++) {
       let max = (i != nbSec) ? (i+1) * sizeSubSector + minPos : sizeSector + 1 + minPos;
       let min = i * sizeSubSector + minPos;
-      console.log("NIVEAU : " + niv)
+      // console.log("NIVEAU : " + niv)
       let sequencesLeaves = this.find(min, max, sequences);
       let children = (nbWord(sequencesLeaves) < minWord) ? sequencesLeaves : this.constructTree(max - min, sequencesLeaves, nbSec, minWord, niv+1, min);
 
