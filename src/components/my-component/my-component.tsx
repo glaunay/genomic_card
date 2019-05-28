@@ -1,5 +1,6 @@
 import { Component, Prop, State, Listen, EventEmitter, Event } from '@stencil/core';
 import * as d3 from "d3";
+import * as clTree from './clusteringTree';
 
 @Component({
   tag: 'genomic-card',
@@ -32,7 +33,7 @@ export class MyComponent {
     this.emitRefChange = this.emitRefChange.bind(this);
     this.emitSgrnaChange = this.emitSgrnaChange.bind(this);
     this.generatePlot = this.generatePlot.bind(this);
-    this.displayPlot = this.displayPlot.bind(this);
+    // this.displayPlot = this.displayPlot.bind(this);
     this.generateGenomicCard = this.generateGenomicCard.bind(this);
   }
 
@@ -92,7 +93,12 @@ export class MyComponent {
     console.log("******* Plot *******")
     this.plotArray = plotArray;
     console.log(plotArray);
+
+    const test = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
+    console.log(test);
   }
+
+
 // *************************** GENOMIC CARD ***************************
   componentDidLoad() {
     this.newMethod();
@@ -173,147 +179,6 @@ export class MyComponent {
 
 
 // *************************** DISPLAY ***************************
-
-  displayPlot() {
-    ///////////////////////////////////////////////////////////////////////////
-    //////////////////// Set up and initiate svg containers ///////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    // var margin = {
-    // 	top: 70,
-    // 	right: 20,
-    // 	bottom: 120,
-    // 	left: 20
-    // };
-    // var width = 600 - margin.left - margin.right - 20;
-    // var height = 600 - margin.top - margin.bottom - 20;
-
-
-    d3.select('#densityPlot')
-        .selectAll('g').remove()
-
-     let svg = d3.select('#displayGenomicCard')
-                .append('g')
-                  .attr('transform', 'translate(400,290)');
-
-    ///////////////////////////////////////////////////////////////////////////
-    //////////////////////////// Create scales ////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    //Set the minimum inner radius and max outer radius of the chart
-    var	outerRadius = 290,
-    	innerRadius = 240;
-
-    //Base the color scale on average temperature extremes
-    // var colorScale = d3.scaleLinear()
-    // 	.domain([-15, 7.5, 30])
-    // 	.range(["#2c7bb6", "#ffff8c", "#d7191c"])
-    // 	.interpolate(d3.interpolateHcl);
-
-    //Scale for the heights of the bar, not starting at zero to give the bars an initial offset outward
-    var barScale = d3.scaleLinear()
-    	.range([innerRadius, outerRadius])
-    	.domain([0,20]);
-
-    //Scale to turn the date into an angle of 360 degrees in total
-    //With the first datapoint (Jan 1st) on top
-    var angle = d3.scaleLinear()
-    	.range([-180, 180])
-    	.domain([0, 6]);
-    let test = [[0, 12], [1, 12], [2, 3], [3, 3], [4, 10], [5, 11]];
-      ///////////////////////////////////////////////////////////////////////////
-      ///////////////////////////// Create Axes /////////////////////////////////
-      ///////////////////////////////////////////////////////////////////////////
-      //Wrapper for the bars and to position it downward
-      var barWrapper = svg.append("g")
-	                        .attr("transform", "translate(" + 0 + "," + 0 + ")");
-
-      //Draw gridlines below the bars
-      var axes = barWrapper.selectAll(".gridCircles")
-                           	.data([0, 5, 10, 15, 20])
-                           	.enter().append("g");
-      //Draw the circles
-      axes.append("circle")
-         	.attr("class", "axisCircles")
-         	.attr("r", function(d) { return barScale(d); });
-          //Draw the axis labels
-      axes.append("text")
-        	.attr("class", "axisText")
-        	.attr("y", function(d) { return barScale(d); })
-        	.attr("dy", "0.3em")
-        	.text(function(d) { return d });
-
-      ///////////////////////////////////////////////////////////////////////////
-      ////////////////////////////// Draw bars //////////////////////////////////
-      ///////////////////////////////////////////////////////////////////////////
-
-      //Draw a bar per day were the height is the difference between the minimum and maximum temperature
-      //And the color is based on the mean temperature
-      barWrapper.selectAll(".tempBar")
-       	.data(test)
-       	.enter().append("rect")
-       	.attr("class", "tempBar")
-       	.attr("transform", function(d) { return "rotate(" + (angle(d[0])) + ")"; })
-       	.attr("width", 1.5)
-      	.attr("height", 10)
-       	.attr("x", -0.75)
-       	.attr("y", function(d) {return barScale(d[1]); })
-       	//.style("fill", function(d) { return colorScale(d.mean_temp); });
-
-
-    // svg.append('path')
-    //    .attr('class', 'mypath')
-    //    .datum(this.plotArray)
-    //    .attr('fill', '#69b3a2')
-    //    .attr('opacity', '.8')
-    //    .attr('stroke', '#000')
-    //    .attr('stroke-width', 1)
-    //    .attr('stroke-linejoin', 'round')
-    //    .attr('d', d3.line()
-    //     .curve(d3.curveBasis)
-    //       .x( (d) => {return x(d[1]);})
-    //       .y( (d) => {return y(d[0]);})
-    //     );
-  }
-
-
-  // displayPlot() {
-  //   var margin = {top: 10, right: 10, bottom: 10, left: 10},
-  //       width = 460 - margin.left - margin.right,
-  //       height = 460 - margin.top - margin.bottom,
-  //       innerRadius = 340,
-  //       outerRadius = Math.min(width, height);
-  //
-  //   d3.select('#densityPlot')
-  //       .selectAll('g').remove()
-  //    let svg = d3.select('#densityPlot')
-  //                 .attr('width', width + margin.left + margin.right)
-  //                 .attr('height', height + margin.top + margin.bottom)
-  //               .append('g')
-  //                 .attr("transform", "translate(" + width / 2 + "," + ( height/2+100 )+ ")"); // Add 100 on Y translation, cause upper bars are longer
-  //
-  //   var x = d3.scaleLinear()
-  //        .range([0, 2 * Math.PI])    // X axis goes from 0 to 2pi = all around the circle. If I stop at 1Pi, it will be around a half circle
-  //        .domain( [0, 6] ); // The domain of the X axis is the list of states.
-  //
-  //  var y = d3.scaleLinear()
-  //        .range([innerRadius, outerRadius])   // Domain will be define later.
-  //        .domain([0, 4]); // Domain of Y is from 0 to the max seen in the data
-  // let test = [[12, 1], [10, 2], [15, 3], [3, 4], [2, 5], [10, 6]];
-  //  svg.append("g")
-  //     .selectAll("path")
-  //     .data(test)
-  //     .enter()
-  //     .append("path")
-  //       .attr("fill", "#69b3a2")
-  //       .attr("d", d3.arc()     // imagine your doing a part of a donut plot
-  //           .innerRadius(innerRadius)
-  //           .outerRadius(function(d) { return y(d[0]); })
-  //           .startAngle(function(d) { return x(d[1]); })
-  //           .endAngle(function(d) { return x(d[1]); })
-  //           .padAngle(0.01)
-  //           .padRadius(innerRadius))
-  // }
-
-
   render() {
     console.log("render called");
     let tabOrgName = this.org_names.split("&");
@@ -378,7 +243,7 @@ export class MyComponent {
           </svg>
 
            {/* ************* Plot *************  */}
-          <svg id='densityPlot'> {this.displayPlot()}</svg>
+
 
         </div>
       </div>,
