@@ -190,7 +190,7 @@ export class MyComponent {
         .data(root.descendants().filter(d => d.depth > 1))
         .enter().append('path')
           .attr('fill','green')
-          // @st-error
+          // @ts-ignore
           .attr('d', arc)
           .attr('transform', 'translate(300, 450)')
           .append('title')
