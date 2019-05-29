@@ -14,7 +14,7 @@ export class TreeClustering {
   // Genome's size, dictionary of sequences with their coordinates, the number of sector,
   // the min number before represent it by reads
   constructor(sizeGenome: number, sequences: any, nbSec: number, minWord: number) {
-    let children = this.constructTree(sizeGenome, sequences, nbSec, minWord, 0, 0);
+    let children = this.constructTree(sizeGenome, sequences, nbSec, minWord, 1, 0);
     this.root = {'min': 0, 'max': sizeGenome, 'children': children};
   }
 

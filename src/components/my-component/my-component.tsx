@@ -17,7 +17,6 @@ export class MyComponent {
   @State() refSelected:string;
   @State() sgrnaSelected:string;
   @State() sizeSelected:number=3000000;
-  @State() plotArray: any;
 
   @Prop() org_names: string;
   @Prop() height_svg: number;
@@ -83,30 +82,6 @@ export class MyComponent {
   emitSgrnaChange(event: Event){
     let val = (event.currentTarget as HTMLOptionElement).value;
     this.changeSgrnaCard.emit(val);
-  }
-
-  generatePlot() {
-    let plotArray = new Array(this.sizeSelected).fill(0);
-    for (var i in this.show_data) {
-
-      this.show_data[i].forEach(coord => {
-        let start = (/\(([0-9]*),/.exec(coord)[1] as unknown as number);
-        let end = (/,([0-9]*)\)/.exec(coord)[1] as unknown as number);
-
-        plotArray.slice(start -1, end).forEach(function(part, index) {
-          this[index] = part + 1;
-        }, plotArray);
-      })
-    }
-    plotArray.forEach(function(part, index) {
-      this[index] = [part, index + 1];
-    }, plotArray);
-    console.log("******* Plot *******")
-    this.plotArray = plotArray;
-    console.log(plotArray);
-
-    const test = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
-    console.log(test);
   }
 
 
@@ -189,6 +164,56 @@ export class MyComponent {
   }
 
 
+// *************************** SUNBURST **************************
+  generatePlot() {
+    d3.select('.sunburst').remove();
+    const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
+    const root = d3.partition().size([2*Math.PI, 466])(d3.hierarchy(treeClustering.root).sum(() => 5));
+
+    const arc =d3.arc()
+        .startAngle(d =>  d['x0'])
+        .endAngle(d => d['x1'])
+        .padAngle(d => Math.min((d['x1'] - d['x0']) / 2, 0.005))
+        .padRadius(466 / 2)
+        .innerRadius(d => d['y0'])
+        .outerRadius(d => d['y1'] - 1);
+
+    const svg = d3.select('body')
+                  .append('svg')
+                  .style('height', this.height_svg)
+                  .style('width', this.width_svg)
+                  .attr('class', 'sunburst');
+
+    svg.append('g')
+        .attr('fill-opacity', 0.6)
+        .selectAll('path')
+        .data(root.descendants().filter(d => d.depth > 1))
+        .enter().append('path')
+          .attr('fill','green')
+          // @st-error
+          .attr('d', arc)
+          .attr('transform', 'translate(300, 450)')
+          .append('title')
+            .text(d => d.weight);
+
+    svg.append("g")
+    .attr('transform', 'translate(300, 450)')
+        .attr("pointer-events", "none")
+        .attr("text-anchor", "middle")
+      .selectAll("text")
+      .data(root.descendants().filter(d => d.depth > 1 && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
+      .enter().append("text")
+        .attr("transform", function(d) {
+          const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+          const y = (d.y0 + d.y1) / 2;
+          return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+        })
+        .attr("dy", "0.35em")
+        .text(d => d.data['weight']);
+    return svg.node();
+  }
+
+
 // *************************** DISPLAY ***************************
   render() {
     console.log("render called");
@@ -207,8 +232,6 @@ export class MyComponent {
         this.refSelected = this.genomeRef[0];
         this.show_data = all_data[this.orgSelected][this.refSelected];
         this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
-
-        this.generatePlot()
       }
     }
 
@@ -261,7 +284,7 @@ export class MyComponent {
           </svg>
 
            {/* ************* Plot *************  */}
-
+           {this.generatePlot()}
 
         </div>
       </div>,
