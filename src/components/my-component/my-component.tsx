@@ -169,7 +169,7 @@ export class MyComponent {
     d3.select('.sunburst').remove();
     const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
     const root = d3.partition().size([2*Math.PI, 466])(d3.hierarchy(treeClustering.root).sum(() => 5));
-
+    console.log(treeClustering.root['weight'])
     const arc =d3.arc()
         .startAngle(d =>  d['x0'])
         .endAngle(d => d['x1'])
@@ -178,6 +178,11 @@ export class MyComponent {
         .innerRadius(d => d['y0'])
         .outerRadius(d => d['y1'] - 1);
 
+    const color = d3.scaleQuantize()
+              // RECHERCHER L ENFANT AVEC LE POIDS MAXIMAL CAR LE ROOT ADITIONNE TOUS LES POIDS
+              .domain([0, treeClustering.root['weight']])
+              // @ts-ignore
+              .range(['#F7FACE', '#E0F6BF', '#C1F2B0', '#A3EDAA', '#96E7B9', '#8BE0CD', '#80CDD8', '#6DA7C3', '#5B81AD', '#4A5E95', '#3A3E7D']);
     const svg = d3.select('body')
                   .append('svg')
                   .style('height', this.height_svg)
@@ -189,7 +194,7 @@ export class MyComponent {
         .selectAll('path')
         .data(root.descendants().filter(d => d.depth > 1))
         .enter().append('path')
-          .attr('fill','green')
+          .attr('fill',d => {return color(d.data['weight'])})
           // @ts-ignore
           .attr('d', arc)
           .attr('transform', 'translate(300, 450)')
