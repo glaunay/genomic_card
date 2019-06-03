@@ -180,9 +180,11 @@ export class MyComponent {
 
     const color = d3.scaleQuantize()
               // RECHERCHER L ENFANT AVEC LE POIDS MAXIMAL CAR LE ROOT ADITIONNE TOUS LES POIDS
+              // --> si fait cela, il n'y aura pas de couleur pour les poids à la racine
               .domain([0, treeClustering.root['weight']])
               // @ts-ignore
               .range(['#F7FACE', '#E0F6BF', '#C1F2B0', '#A3EDAA', '#96E7B9', '#8BE0CD', '#80CDD8', '#6DA7C3', '#5B81AD', '#4A5E95', '#3A3E7D']);
+    console.log('Enfant MAX : ' + treeClustering.root['weight']);
     const svg = d3.select('body')
                   .append('svg')
                   .style('height', this.height_svg)
@@ -215,6 +217,79 @@ export class MyComponent {
         })
         .attr("dy", "0.35em")
         .text(d => d.data['weight']);
+        ///////////////////////////////////////////////////////////////////////////
+        //////////////// Create the gradient for the legend ///////////////////////
+        ///////////////////////////////////////////////////////////////////////////
+
+        //Extra scale since the color scale is interpolated
+        var tempScale = d3.scaleLinear()
+        	.domain([-15, 30])
+        	.range([0, 12]);
+
+        //Calculate the variables for the temp gradient
+        var numStops = 10;
+        let tempRange = tempScale.domain();
+        tempRange[2] = tempRange[1] - tempRange[0];
+        let tempPoint = [];
+        for(var i = 0; i < numStops; i++) {
+        	tempPoint.push(i * tempRange[2]/(numStops-1) + tempRange[0]);
+        }//for i
+
+        //Create the gradient
+        svg.append("defs")
+        	.append("linearGradient")
+        	.attr("id", "legend-weather")
+        	.attr("x1", "0%").attr("y1", "0%")
+        	.attr("x2", "100%").attr("y2", "0%")
+        	.selectAll("stop")
+        	.data(d3.range(numStops))
+        	.enter().append("stop")
+        	.attr("offset", function(d,i) { return tempScale( tempPoint[i] )/12; })
+        	.attr("stop-color", function(d,i) { return color( tempPoint[i] ); });
+
+        ///////////////////////////////////////////////////////////////////////////
+    ////////////////////////// Draw the legend ////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+
+    var legendWidth = Math.min(200, 400);
+
+    //Color Legend container
+    var legendsvg = svg.append("g")
+    	.attr("class", "legendWrapper")
+    	.attr("transform", "translate(" + 0 + "," + (100 + 70) + ")");
+
+    //Draw the Rectangle
+    legendsvg.append("rect")
+    	.attr("class", "legendRect")
+    	.attr("x", -legendWidth/2)
+    	.attr("y", 0)
+    	.attr("rx", 8/2)
+    	.attr("width", legendWidth)
+    	.attr("height", 8)
+    	.style("fill", "url(#legend-weather)");
+
+    //Append title
+    legendsvg.append("text")
+    	.attr("class", "legendTitle")
+    	.attr("x", 0)
+    	.attr("y", -10)
+    	.style("text-anchor", "middle")
+    	.text("Average Daily Temperature");
+
+    //Set scale for x-axis
+    var xScale = d3.scaleLinear()
+    	 .range([-legendWidth/2, legendWidth/2])
+    	 .domain([0,treeClustering.root['weight']] );
+
+    //Define x-axis
+    var xAxis = d3.axisBottom(xScale)
+    	  .ticks(5)
+    	  .tickFormat( (d) => {return d});
+    //Set up X axis
+    legendsvg.append("g")
+    	.attr("class", "axis")
+    	.attr("transform", "translate(0," + (10) + ")")
+    	.call(xAxis);
     return svg.node();
   }
 
