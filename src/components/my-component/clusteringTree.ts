@@ -17,7 +17,7 @@ export class TreeClustering {
     let children = this.constructTree(sizeGenome, sequences, nbSec, minWord, 1, 0);
     let totalWeight = 0;
     children.forEach(child => totalWeight += child.weight);
-    this.root = {'min': 0, 'max': sizeGenome, 'children': children, 'weight': totalWeight};
+    this.root = {'min': 0, 'max': sizeGenome, 'children': children, 'weight': totalWeight, 'niv': 0};
   }
 
   find(min, max, sequences) {
@@ -54,7 +54,7 @@ export class TreeClustering {
       // it's a node
       let children = (nbWord(sequencesLeaves) < minWord) ? sequencesLeaves : this.constructTree(max - min, sequencesLeaves, nbSec, minWord, niv+1, min);
 
-      listChildren.push({'min': min, 'max': max, 'children': children, 'weight': nbWord(sequencesLeaves)});
+      listChildren.push({'min': min, 'max': max, 'children': children, 'weight': nbWord(sequencesLeaves), 'niv': niv});
     }
     return listChildren;
   }

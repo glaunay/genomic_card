@@ -88,6 +88,7 @@ export class MyComponent {
 // *************************** GENOMIC CARD ***************************
   componentDidLoad() {
     this.newMethod();
+    this.generatePlot();
   }
 
   private newMethod() {
@@ -159,26 +160,25 @@ export class MyComponent {
                   .ease(d3.easeBackInOut)
                   .duration(600)
                   .attr('d', pathSgRNA)
-                  .attr('transform', 'translate(600, 600)')
+                  .attr('transform', 'translate(500, 500)')
       }
   }
 
 
 // *************************** SUNBURST **************************
   generatePlot() {
-    // d3.select('.sunburst').remove();
     const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
-    const root = d3.partition().size([2*Math.PI, 466])(d3.hierarchy(treeClustering.root).sum(() => 5));
-    console.log(treeClustering)
+    const radius = 270, padInnerRadisu = 190;
+    const root = d3.partition().size([2*Math.PI, radius])(d3.hierarchy(treeClustering.root).sum((d) => d['niv']));
     let maxChild = Math.max(...treeClustering.root['children'].map(o => {console.log(o.weight); return o.weight}));
-    console.log('Max children ' + maxChild);
+
     const arc =d3.arc()
         .startAngle(d =>  d['x0'])
         .endAngle(d => d['x1'])
         .padAngle(d => Math.min((d['x1'] - d['x0']) / 2, 0.005))
-        .padRadius(466 / 2)
-        .innerRadius(d => d['y0'] + 150)
-        .outerRadius(d => d['y1'] - 1 + 150);
+        .padRadius(radius / 2)
+        .innerRadius(d => d['y0'] + padInnerRadisu)
+        .outerRadius(d => d['y1'] - 1 + padInnerRadisu);
 
     const color = d3.scaleQuantize()
               .domain([0, maxChild])
@@ -194,12 +194,16 @@ export class MyComponent {
           .attr('fill',d => {return color(d.data['weight'])})
           // @ts-ignore
           .attr('d', arc)
-          .attr('transform', 'translate(600, 600)')
-          .append('title')
-            .text(d => d.weight);
+          .attr('transform', 'translate(500, 500)')
+          // .attr('opacity', (d) => {return d.depth < 2 ? 1 : 0})
+          // .on("click", (d) => {
+          //   console.log("Click on " + d.x0 + "  " + d.x1);
+          //    console.log(d.children)
+          // });
+
 
     svg.append("g")
-    .attr('transform', 'translate(600, 600)')
+    .attr('transform', 'translate(500, 500)')
         .attr("pointer-events", "none")
         .attr("text-anchor", "middle")
       .selectAll("text")
@@ -207,11 +211,12 @@ export class MyComponent {
       .enter().append("text")
         .attr("transform", function(d) {
           const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-          const y = (d.y0 + d.y1) / 2 + 150;
+          const y = (d.y0 + d.y1) / 2 + padInnerRadisu;
           return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
         })
         .attr("dy", "0.35em")
-        .text(d => d.data['weight']);
+        .text(d => d.data['weight'])
+        // .attr('opacity', (d) => {return d.depth < 2 ? 1 : 0});
         ///////////////////////////////////////////////////////////////////////////
         //////////////// Create the gradient for the legend ///////////////////////
         ///////////////////////////////////////////////////////////////////////////
@@ -228,7 +233,7 @@ export class MyComponent {
         let tempPoint = [];
         for(var i = 0; i < numStops; i++) {
         	tempPoint.push(i * tempRange[2]/(numStops-1) + tempRange[0]);
-        }//for i
+        }
 
         //Create the gradient
         svg.append("defs")
@@ -357,7 +362,7 @@ export class MyComponent {
            {/* ************* Card *************  */}
           <svg id='displayGenomicCard' width={this.width_svg} height={this.height_svg}>
             {this.generateGenomicCard()}
-            <text transform= 'translate(560, 600)'> {this.sizeSelected} pb </text>
+            <text transform= 'translate(460, 500)'> {this.sizeSelected} pb </text>
           </svg>
 
            {/* ************* Plot *************  */}
@@ -389,6 +394,6 @@ function DisplayGenome () {
     .append("g")
     .append('path')
     .attr('d', pathGenome)
-    .attr('transform', 'translate(600, 600)')
+    .attr('transform', 'translate(500, 500)')
     .style('fill', 'steelblue');
 }
