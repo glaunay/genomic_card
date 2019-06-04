@@ -159,14 +159,14 @@ export class MyComponent {
                   .ease(d3.easeBackInOut)
                   .duration(600)
                   .attr('d', pathSgRNA)
-                  .attr('transform', 'translate(400, 290)')
+                  .attr('transform', 'translate(600, 600)')
       }
   }
 
 
 // *************************** SUNBURST **************************
   generatePlot() {
-    d3.select('.sunburst').remove();
+    // d3.select('.sunburst').remove();
     const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
     const root = d3.partition().size([2*Math.PI, 466])(d3.hierarchy(treeClustering.root).sum(() => 5));
     console.log(treeClustering)
@@ -177,21 +177,15 @@ export class MyComponent {
         .endAngle(d => d['x1'])
         .padAngle(d => Math.min((d['x1'] - d['x0']) / 2, 0.005))
         .padRadius(466 / 2)
-        .innerRadius(d => d['y0'])
-        .outerRadius(d => d['y1'] - 1);
+        .innerRadius(d => d['y0'] + 150)
+        .outerRadius(d => d['y1'] - 1 + 150);
 
     const color = d3.scaleQuantize()
-              // RECHERCHER L ENFANT AVEC LE POIDS MAXIMAL CAR LE ROOT ADITIONNE TOUS LES POIDS
-              // --> si fait cela, il n'y aura pas de couleur pour les poids à la racine
               .domain([0, maxChild])
               // @ts-ignore
               .range(['#F7FACE', '#E0F6BF', '#C1F2B0', '#A3EDAA', '#96E7B9', '#8BE0CD', '#80CDD8', '#6DA7C3', '#5B81AD', '#4A5E95', '#3A3E7D']);
-    const svg = d3.select('body')
-                  .append('svg')
-                  .style('height', this.height_svg)
-                  .style('width', this.width_svg)
-                  .attr('class', 'sunburst');
 
+    const svg = d3.select('#displayGenomicCard');
     svg.append('g')
         .attr('fill-opacity', 0.6)
         .selectAll('path')
@@ -200,12 +194,12 @@ export class MyComponent {
           .attr('fill',d => {return color(d.data['weight'])})
           // @ts-ignore
           .attr('d', arc)
-          .attr('transform', 'translate(300, 450)')
+          .attr('transform', 'translate(600, 600)')
           .append('title')
             .text(d => d.weight);
 
     svg.append("g")
-    .attr('transform', 'translate(300, 450)')
+    .attr('transform', 'translate(600, 600)')
         .attr("pointer-events", "none")
         .attr("text-anchor", "middle")
       .selectAll("text")
@@ -213,7 +207,7 @@ export class MyComponent {
       .enter().append("text")
         .attr("transform", function(d) {
           const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-          const y = (d.y0 + d.y1) / 2;
+          const y = (d.y0 + d.y1) / 2 + 150;
           return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
         })
         .attr("dy", "0.35em")
@@ -245,7 +239,9 @@ export class MyComponent {
         	.selectAll("stop")
         	.data(d3.range(numStops))
         	.enter().append("stop")
+          // @ts-ignore
         	.attr("offset", function(d,i) { return tempScale( tempPoint[i] )/12; })
+          // @ts-ignore
         	.attr("stop-color", function(d,i) { return color( tempPoint[i] ); });
 
         ///////////////////////////////////////////////////////////////////////////
@@ -257,7 +253,7 @@ export class MyComponent {
     //Color Legend container
     var legendsvg = svg.append("g")
     	.attr("class", "legendWrapper")
-    	.attr("transform", "translate(" + 200 + "," + (100 + 70) + ")");
+    	.attr("transform", "translate(" + 130 + "," + 30 + ")");
 
     //Draw the Rectangle
     legendsvg.append("rect")
@@ -361,7 +357,7 @@ export class MyComponent {
            {/* ************* Card *************  */}
           <svg id='displayGenomicCard' width={this.width_svg} height={this.height_svg}>
             {this.generateGenomicCard()}
-            <text transform= 'translate(370, 300)'> {this.sizeSelected} pb </text>
+            <text transform= 'translate(560, 600)'> {this.sizeSelected} pb </text>
           </svg>
 
            {/* ************* Plot *************  */}
@@ -393,6 +389,6 @@ function DisplayGenome () {
     .append("g")
     .append('path')
     .attr('d', pathGenome)
-    .attr('transform', 'translate(400, 290)')
+    .attr('transform', 'translate(600, 600)')
     .style('fill', 'steelblue');
 }
