@@ -167,11 +167,11 @@ export class MyComponent {
 
 // *************************** SUNBURST **************************
   generatePlot() {
-    const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
+    const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 7);
     const radius = 270, padInnerRadisu = 190;
     const root = d3.partition().size([2*Math.PI, radius])(d3.hierarchy(treeClustering.root).sum((d) => d['niv']));
     let maxChild = Math.max(...treeClustering.root['children'].map(o => {console.log(o.weight); return o.weight}));
-
+    console.log(root)
     const arc =d3.arc()
         .startAngle(d =>  d['x0'])
         .endAngle(d => d['x1'])
