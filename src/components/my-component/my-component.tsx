@@ -16,7 +16,7 @@ export class MyComponent {
   @State() orgSelected:string;
   @State() refSelected:string;
   @State() sgrnaSelected:string;
-  @State() sizeSelected:number=3000000;
+  @State() sizeSelected:number=4518734;
 
   @Prop() org_names: string;
   @Prop() height_svg: number;
