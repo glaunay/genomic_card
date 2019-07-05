@@ -11,9 +11,8 @@ import { HTMLStencilElement, JSXBase } from '@stencil/core/internal';
 export namespace Components {
   interface GenomicCard {
     'all_data': string;
-    'height_svg': number;
+    'diagonal_svg': number;
     'org_names': string;
-    'width_svg': number;
   }
 }
 
@@ -33,12 +32,11 @@ declare global {
 declare namespace LocalJSX {
   interface GenomicCard extends JSXBase.HTMLAttributes<HTMLGenomicCardElement> {
     'all_data'?: string;
-    'height_svg'?: number;
+    'diagonal_svg'?: number;
     'onChangeOrgCard'?: (event: CustomEvent<any>) => void;
     'onChangeRefCard'?: (event: CustomEvent<any>) => void;
     'onChangeSgrnaCard'?: (event: CustomEvent<any>) => void;
     'org_names'?: string;
-    'width_svg'?: number;
   }
 
   interface IntrinsicElements {

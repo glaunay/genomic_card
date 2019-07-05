@@ -21,8 +21,7 @@ export class MyComponent {
   @State() sizeSelected:number=4518734;
 
   @Prop() org_names: string;
-  @Prop() height_svg: number;
-  @Prop() width_svg: number;
+  @Prop() diagonal_svg: number;
   @Prop() all_data: string;
 
 
@@ -112,11 +111,12 @@ export class MyComponent {
   }
 
   private newMethod() {
-    DisplayGenome(this.element.shadowRoot);
+    DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
   }
 
   generateGenomicCard() {
-    DisplayGenome(this.element.shadowRoot);
+    let width = this.diagonal_svg, height = this.diagonal_svg;
+    DisplayGenome(this.element.shadowRoot, width, height);
     if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
 
     console.log("Loaded")
@@ -136,8 +136,8 @@ export class MyComponent {
     .style('opacity', 0);
     // Generator arc for one sgRNA
     let pathSgRNA = d3.arc()
-      .innerRadius(205)
-      .outerRadius(220);
+      .innerRadius(width*15/100 + width*2/100)
+      .outerRadius(width*15/100 + width*3.5/100);
 
     // Draw sgRNA
     d3.select(this.element.shadowRoot.querySelector('svg'))
@@ -180,7 +180,7 @@ export class MyComponent {
                   .ease(d3.easeBackInOut)
                   .duration(600)
                   .attr('d', pathSgRNA)
-                  .attr('transform', 'translate(500, 500)')
+                  .attr('transform', `translate( ${width / 2} , ${height / 2})`)
       }
   }
 
@@ -188,7 +188,7 @@ export class MyComponent {
 // *************************** SUNBURST **************************
   generatePlot() {
     const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 7);
-    const radius = 270, padInnerRadisu = 190;
+    const radius = this.diagonal_svg*10/100 + this.diagonal_svg*15/100, padInnerRadisu = this.diagonal_svg*10/100 + this.diagonal_svg*10/100;
     const root = d3.partition().size([2*Math.PI, radius])(d3.hierarchy(treeClustering.root).sum((d) => d['niv']));
     let maxChild = Math.max(...treeClustering.root['children'].map(o => {console.log(o.weight); return o.weight}));
     console.log(root)
@@ -214,7 +214,7 @@ export class MyComponent {
           .attr('fill',d => {return color(d.data['weight'])})
           // @ts-ignore
           .attr('d', arc)
-          .attr('transform', 'translate(500, 500)')
+          .attr('transform', 'translate(' + this.diagonal_svg/2 + ', ' + this.diagonal_svg/2 + ')')
           // .attr('opacity', (d) => {return d.depth < 2 ? 1 : 0})
           // .on("click", (d) => {
           //   console.log("Click on " + d.x0 + "  " + d.x1);
@@ -223,7 +223,7 @@ export class MyComponent {
 
 
     svg.append("g")
-    .attr('transform', 'translate(500, 500)')
+    .attr('transform', 'translate(' + this.diagonal_svg/2 + ', ' + this.diagonal_svg/2 + ')')
         .attr("pointer-events", "none")
         .attr("text-anchor", "middle")
       .selectAll("text")
@@ -380,9 +380,9 @@ export class MyComponent {
           </div>
 
            {/* ************* Card *************  */}
-          <svg id='displayGenomicCard' width={this.width_svg} height={this.height_svg}>
+          <svg id='displayGenomicCard' width={this.diagonal_svg} height={this.diagonal_svg}>
             {this.generateGenomicCard()}
-            <text transform= 'translate(460, 500)'> {this.sizeSelected} pb </text>
+            <text transform= {`translate(${this.diagonal_svg/2 - 30} , ${this.diagonal_svg/2})`}> {this.sizeSelected} pb </text>
           </svg>
 
            {/* ************* Plot *************  */}
@@ -398,7 +398,7 @@ export class MyComponent {
 }
 
 // Display the entire blue circle
-function DisplayGenome (root) {
+function DisplayGenome (root, width, height) {
   // Clean all arc
   d3.select(root.querySelector('#displayGenomicCard')).selectAll('g').remove();
   let arcGenerator = d3.arc();
@@ -406,14 +406,14 @@ function DisplayGenome (root) {
   let pathGenome = arcGenerator({
     startAngle: 0,
     endAngle: 2 * Math.PI,
-    innerRadius: 190,
-    outerRadius: 200
+    innerRadius: width*15/100 - width*1/100,
+    outerRadius: width*15/100
   })
   // Draw the complete genome
   d3.select(root.querySelector('svg'))
     .append("g")
     .append('path')
     .attr('d', pathGenome)
-    .attr('transform', 'translate(500, 500)')
+    .attr('transform', 'translate(' + width/2 + ', ' + height/2 + ')')
     .style('fill', 'steelblue');
 }
