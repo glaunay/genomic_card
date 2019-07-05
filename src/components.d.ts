@@ -5,38 +5,19 @@
  */
 
 
-import '@stencil/core';
-
-
+import { HTMLStencilElement, JSXBase } from '@stencil/core/internal';
 
 
 export namespace Components {
-
   interface GenomicCard {
     'all_data': string;
     'height_svg': number;
     'org_names': string;
     'width_svg': number;
   }
-  interface GenomicCardAttributes extends StencilHTMLAttributes {
-    'all_data'?: string;
-    'height_svg'?: number;
-    'onChangeOrgCard'?: (event: CustomEvent) => void;
-    'onChangeRefCard'?: (event: CustomEvent) => void;
-    'onChangeSgrnaCard'?: (event: CustomEvent) => void;
-    'org_names'?: string;
-    'width_svg'?: number;
-  }
 }
 
 declare global {
-  interface StencilElementInterfaces {
-    'GenomicCard': Components.GenomicCard;
-  }
-
-  interface StencilIntrinsicElements {
-    'genomic-card': Components.GenomicCardAttributes;
-  }
 
 
   interface HTMLGenomicCardElement extends Components.GenomicCard, HTMLStencilElement {}
@@ -44,22 +25,34 @@ declare global {
     prototype: HTMLGenomicCardElement;
     new (): HTMLGenomicCardElement;
   };
-
   interface HTMLElementTagNameMap {
-    'genomic-card': HTMLGenomicCardElement
-  }
-
-  interface ElementTagNameMap {
     'genomic-card': HTMLGenomicCardElement;
   }
-
-
-  export namespace JSX {
-    export interface Element {}
-    export interface IntrinsicElements extends StencilIntrinsicElements {
-      [tagName: string]: any;
-    }
-  }
-  export interface HTMLAttributes extends StencilHTMLAttributes {}
-
 }
+
+declare namespace LocalJSX {
+  interface GenomicCard extends JSXBase.HTMLAttributes<HTMLGenomicCardElement> {
+    'all_data'?: string;
+    'height_svg'?: number;
+    'onChangeOrgCard'?: (event: CustomEvent<any>) => void;
+    'onChangeRefCard'?: (event: CustomEvent<any>) => void;
+    'onChangeSgrnaCard'?: (event: CustomEvent<any>) => void;
+    'org_names'?: string;
+    'width_svg'?: number;
+  }
+
+  interface IntrinsicElements {
+    'genomic-card': GenomicCard;
+  }
+}
+
+export { LocalJSX as JSX };
+
+
+declare module "@stencil/core" {
+  export namespace JSX {
+    interface IntrinsicElements extends LocalJSX.IntrinsicElements {}
+  }
+}
+
+

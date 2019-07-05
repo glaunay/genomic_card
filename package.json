@@ -1,5 +1,5 @@
 {
-  "name": "genomic-card",
+  "name": "@mmsb/genomic-card",
   "version": "0.0.1",
   "description": "Stencil Component Starter",
   "module": "dist/esm/index.js",
@@ -24,7 +24,7 @@
     "jquery": "^3.4.1"
   },
   "devDependencies": {
-    "@stencil/core": "~0.16.2"
+    "@stencil/core": "^1.1.4"
   },
   "license": "MIT"
 }
