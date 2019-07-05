@@ -17,11 +17,11 @@
 
 ## Events
 
-| Event             | Description | Type                |
-| ----------------- | ----------- | ------------------- |
-| `changeOrgCard`   |             | `CustomEvent<void>` |
-| `changeRefCard`   |             | `CustomEvent<void>` |
-| `changeSgrnaCard` |             | `CustomEvent<void>` |
+| Event             | Description | Type               |
+| ----------------- | ----------- | ------------------ |
+| `changeOrgCard`   |             | `CustomEvent<any>` |
+| `changeRefCard`   |             | `CustomEvent<any>` |
+| `changeSgrnaCard` |             | `CustomEvent<any>` |
 
 
 ----------------------------------------------

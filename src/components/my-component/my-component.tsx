@@ -1,14 +1,16 @@
-import { Component, Prop, State, Listen, EventEmitter, Event, h } from '@stencil/core';
+import { Component, Prop, State, Listen, EventEmitter, Event, Element, h } from '@stencil/core';
 import * as d3 from "d3";
 import * as clTree from './clusteringTree';
 
 @Component({
   tag: 'genomic-card',
   styleUrl: 'my-component.css',
-  shadow: false
+  shadow: true
 })
 export class MyComponent {
 // *************************** PROPERTY & CONSTRUCTOR ***************************
+  @Element() private element: HTMLElement;
+
   @State() show_data: any;
   @State() allSgrna: string[];
   @State() genomeRef: string[];
@@ -110,11 +112,11 @@ export class MyComponent {
   }
 
   private newMethod() {
-    DisplayGenome();
+    DisplayGenome(this.element.shadowRoot);
   }
 
   generateGenomicCard() {
-    DisplayGenome();
+    DisplayGenome(this.element.shadowRoot);
     if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
 
     console.log("Loaded")
@@ -138,7 +140,7 @@ export class MyComponent {
       .outerRadius(220);
 
     // Draw sgRNA
-    d3.select('svg')
+    d3.select(this.element.shadowRoot.querySelector('svg'))
       .append('g')
       .selectAll('path')
       .data(data)
@@ -203,7 +205,7 @@ export class MyComponent {
               // @ts-ignore
               .range(['#F7FACE', '#E0F6BF', '#C1F2B0', '#A3EDAA', '#96E7B9', '#8BE0CD', '#80CDD8', '#6DA7C3', '#5B81AD', '#4A5E95', '#3A3E7D']);
 
-    const svg = d3.select('#displayGenomicCard');
+    const svg = d3.select(this.element.shadowRoot.querySelector('#displayGenomicCard'));
     svg.append('g')
         .attr('fill-opacity', 0.6)
         .selectAll('path')
@@ -396,9 +398,9 @@ export class MyComponent {
 }
 
 // Display the entire blue circle
-function DisplayGenome () {
+function DisplayGenome (root) {
   // Clean all arc
-  d3.select('#displayGenomicCard').selectAll('g').remove();
+  d3.select(root.querySelector('#displayGenomicCard')).selectAll('g').remove();
   let arcGenerator = d3.arc();
   // Generator arc for the complete genome
   let pathGenome = arcGenerator({
@@ -408,7 +410,7 @@ function DisplayGenome () {
     outerRadius: 200
   })
   // Draw the complete genome
-  d3.select('svg')
+  d3.select(root.querySelector('svg'))
     .append("g")
     .append('path')
     .attr('d', pathGenome)
