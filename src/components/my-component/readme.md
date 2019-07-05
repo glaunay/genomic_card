@@ -7,12 +7,11 @@
 
 ## Properties
 
-| Property     | Attribute    | Description | Type     | Default     |
-| ------------ | ------------ | ----------- | -------- | ----------- |
-| `all_data`   | `all_data`   |             | `string` | `undefined` |
-| `height_svg` | `height_svg` |             | `number` | `undefined` |
-| `org_names`  | `org_names`  |             | `string` | `undefined` |
-| `width_svg`  | `width_svg`  |             | `number` | `undefined` |
+| Property       | Attribute      | Description | Type     | Default     |
+| -------------- | -------------- | ----------- | -------- | ----------- |
+| `all_data`     | `all_data`     |             | `string` | `undefined` |
+| `diagonal_svg` | `diagonal_svg` |             | `number` | `undefined` |
+| `org_names`    | `org_names`    |             | `string` | `undefined` |
 
 
 ## Events
