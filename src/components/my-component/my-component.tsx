@@ -1,4 +1,4 @@
-import { Component, Prop, State, Listen, EventEmitter, Event } from '@stencil/core';
+import { Component, Prop, State, Listen, EventEmitter, Event, h } from '@stencil/core';
 import * as d3 from "d3";
 import * as clTree from './clusteringTree';
 
@@ -49,6 +49,24 @@ export class MyComponent {
     const test = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
     console.log(test);
     console.log(`CLICK on ${this.orgSelected}`);
+  }
+
+  @Listen('changeOrgRefSgrna', { target: 'window' })
+  handleChangeOrgRefSgrna(event: CustomEvent) {
+    var tmp_name = event.detail.axis.split("$");
+    this.orgSelected = tmp_name[0];
+    this.refSelected = tmp_name[1];
+    this.sgrnaSelected = event.detail.sgrna;
+    console.log("**************************************")
+    console.log("Liaison entre table et Carte génomique");
+    console.log("Organisme : " + this.orgSelected);
+    console.log("Reference : " + this.refSelected);
+    console.log("SgRNA : " + this.sgrnaSelected);
+    let all_data = JSON.parse(this.all_data);
+    this.genomeRef = Object.keys(all_data[this.orgSelected]);
+    this.show_data = all_data[this.orgSelected][this.refSelected];
+    this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+    new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
   }
 
   @Listen('changeRefCard')
