@@ -369,6 +369,12 @@ export class MyComponent {
 
 
 // *************************** DISPLAY ***************************
+  showCoord() {
+    let dataOneSgrna = this.show_data[this.sgrnaSelected]
+    console.log(dataOneSgrna);
+    return this.sgrnaSelected;
+  }
+
   render() {
     console.log("render called");
     let tabOrgName = this.org_names.split("&");
@@ -436,6 +442,9 @@ export class MyComponent {
             </select>
           </div>
 
+          <div class="coordBox">
+            {this.showCoord()}
+          </div>
            {/* ************* Card *************  */}
           <svg id='displayGenomicCard' width={this.diagonal_svg} height={this.diagonal_svg}>
             {this.generateGenomicCard()}
