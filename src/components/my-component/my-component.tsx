@@ -12,8 +12,10 @@ export class MyComponent {
   @Element() private element: HTMLElement;
 
   @State() show_data: any;
-  @State() allSgrna: string[];
+  @State() allSgrna: string[] = [];
   @State() genomeRef: string[];
+
+  @State() subSgrna: string[] = [];
 
   @State() orgSelected:string;
   @State() refSelected:string;
@@ -105,20 +107,28 @@ export class MyComponent {
 
 
 // *************************** GENOMIC CARD ***************************
-  componentDidLoad() {
-    this.newMethod();
-    this.generatePlot();
+  componentDidUpdate() {
+    this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
+      this.subSgrna = [];
+      this.sgrnaSelected = "";
+      console.log("Click on whole genome");
+    })
   }
 
-  private newMethod() {
+  componentDidLoad() {
     DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
+    this.generatePlot();
+    this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
+      this.subSgrna = [];
+      console.log("Click on whole genome");
+    })
   }
+
 
   generateGenomicCard() {
     let width = this.diagonal_svg, height = this.diagonal_svg;
     DisplayGenome(this.element.shadowRoot, width, height);
     if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
-
     console.log("Loaded")
     var sizeGenome = this.sizeSelected;
     let data = [];
@@ -184,7 +194,6 @@ export class MyComponent {
       }
   }
 
-
 // *************************** SUNBURST **************************
   generatePlot() {
     const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 7);
@@ -206,6 +215,24 @@ export class MyComponent {
               .range(['#F7FACE', '#E0F6BF', '#C1F2B0', '#A3EDAA', '#96E7B9', '#8BE0CD', '#80CDD8', '#6DA7C3', '#5B81AD', '#4A5E95', '#3A3E7D']);
 
     const svg = d3.select(this.element.shadowRoot.querySelector('#displayGenomicCard'));
+
+    function findSgrnaChildren(list_children):string[] {
+      let allSgrna: string[] = [];
+
+      for (var i in list_children){
+        // Il y a des enfants
+        if(list_children[i].hasOwnProperty('children')) {
+          allSgrna = [... new Set([...findSgrnaChildren(list_children[i].children) , ...allSgrna])];
+          // Il n'y a plus d'enfants, mais il y a des données
+        } else if (list_children[i].data.children != {}){
+          allSgrna = [... new Set([...Object.keys(list_children[i].data.children) , ...allSgrna])];
+        }
+        // Sinon rien à ajouter
+      }
+      return allSgrna;
+    }
+
+    // Section
     svg.append('g')
         .attr('fill-opacity', 0.6)
         .selectAll('path')
@@ -216,12 +243,20 @@ export class MyComponent {
           .attr('d', arc)
           .attr('transform', 'translate(' + this.diagonal_svg/2 + ', ' + this.diagonal_svg/2 + ')')
           // .attr('opacity', (d) => {return d.depth < 2 ? 1 : 0})
-          // .on("click", (d) => {
-          //   console.log("Click on " + d.x0 + "  " + d.x1);
-          //    console.log(d.children)
-          // });
+          .on("click", (d) => {
+            let uniqSgrna:string[];
+            if(d.hasOwnProperty('children')) {
+              uniqSgrna= findSgrnaChildren(d.children);
+              console.log(uniqSgrna)
+            } else   {
+              uniqSgrna = Object.keys(d.data.children);
+              console.log(uniqSgrna);
+            }
+            this.subSgrna = uniqSgrna;
+            this.sgrnaSelected = "";
+          });
 
-
+    // Text
     svg.append("g")
     .attr('transform', 'translate(' + this.diagonal_svg/2 + ', ' + this.diagonal_svg/2 + ')')
         .attr("pointer-events", "none")
@@ -236,7 +271,7 @@ export class MyComponent {
         })
         .attr("dy", "0.35em")
         .text(d => d.data['weight'])
-        // .attr('opacity', (d) => {return d.depth < 2 ? 1 : 0});
+
         ///////////////////////////////////////////////////////////////////////////
         //////////////// Create the gradient for the legend ///////////////////////
         ///////////////////////////////////////////////////////////////////////////
@@ -342,7 +377,9 @@ export class MyComponent {
     return ([
       <div style={{display: displayLoad}}>
         <strong> Loading ... </strong>
-        <div class="spinner-grow text-info" role="status"></div>
+        <div class="spinner-grow text-info" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
       </div>,
 
       /* ************************************************************* */
@@ -373,9 +410,12 @@ export class MyComponent {
 
           <div class="select-menu">
             <span>sgRNA</span>
-            <select class="custom-select" onChange={e => this.emitSgrnaChange(e)}>
+            <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna.length == 0) ? "none" : "rgba(244, 230, 138, 0.2)"}}>
               <option>  </option>
-              {this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)}
+              {(this.subSgrna.length == 0) ?
+                (this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)) :
+                (this.subSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>))
+              }
             </select>
           </div>
 
@@ -413,6 +453,7 @@ function DisplayGenome (root, width, height) {
   // Draw the complete genome
   d3.select(root.querySelector('svg'))
     .append("g")
+    .attr('class', 'genomeCircle')
     .append('path')
     .attr('d', pathGenome)
     .attr('transform', 'translate(' + width/2 + ', ' + height/2 + ')')
