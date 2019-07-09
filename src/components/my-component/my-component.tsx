@@ -15,7 +15,8 @@ export class MyComponent {
   @State() allSgrna: string[] = [];
   @State() genomeRef: string[];
 
-  @State() subSgrna: string[] = [];
+  @State() subSgrna: string[];
+  @State() selectedSection = -1;;
 
   @State() orgSelected:string;
   @State() refSelected:string;
@@ -49,8 +50,9 @@ export class MyComponent {
     this.refSelected = this.genomeRef[0];
     this.show_data = all_data[this.orgSelected][this.refSelected];
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
-    const test = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
-    console.log(test);
+    this.subSgrna = undefined;
+    this.selectedSection = -1;
+    new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
     console.log(`CLICK on ${this.orgSelected}`);
   }
 
@@ -60,11 +62,8 @@ export class MyComponent {
     this.orgSelected = tmp_name[0];
     this.refSelected = tmp_name[1];
     this.sgrnaSelected = event.detail.sgrna;
-    console.log("**************************************")
-    console.log("Liaison entre table et Carte génomique");
-    console.log("Organisme : " + this.orgSelected);
-    console.log("Reference : " + this.refSelected);
-    console.log("SgRNA : " + this.sgrnaSelected);
+    this.subSgrna = undefined;
+    this.selectedSection = -1;
     let all_data = JSON.parse(this.all_data);
     this.genomeRef = Object.keys(all_data[this.orgSelected]);
     this.show_data = all_data[this.orgSelected][this.refSelected];
@@ -78,6 +77,8 @@ export class MyComponent {
     let all_data = JSON.parse(this.all_data);
     this.show_data = all_data[this.orgSelected][this.refSelected];
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+    this.subSgrna = undefined;
+    this.selectedSection = -1;
     const test = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
     console.log(test);
   }
@@ -109,7 +110,8 @@ export class MyComponent {
 // *************************** GENOMIC CARD ***************************
   componentDidUpdate() {
     this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
-      this.subSgrna = [];
+      this.subSgrna = undefined;
+      this.selectedSection = -1;
       this.sgrnaSelected = "";
       console.log("Click on whole genome");
     })
@@ -119,7 +121,7 @@ export class MyComponent {
     DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
     this.generatePlot();
     this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
-      this.subSgrna = [];
+      this.subSgrna = undefined;
       console.log("Click on whole genome");
     })
   }
@@ -234,26 +236,41 @@ export class MyComponent {
 
     // Section
     svg.append('g')
+        .attr('class', 'sunburst')
         .attr('fill-opacity', 0.6)
         .selectAll('path')
         .data(root.descendants().filter(d => d.depth > 0))
         .enter().append('path')
-          .attr('fill',d => {return color(d.data['weight'])})
+          .attr('fill',(d, i) => {
+            if(this.selectedSection == -1) {
+              // Specific color for zero
+              if (d.data['weight'] == 0) {
+                return "rgba(166, 165, 134, 0.75)";
+              }else {
+                return color(d.data['weight']);
+              }
+            } else if (i == this.selectedSection){
+              return "rgba(91, 176, 229, 0.9)";
+            } else {
+              return "rgba(199, 197, 182, 0.9)";
+            }
+          })
           // @ts-ignore
           .attr('d', arc)
           .attr('transform', 'translate(' + this.diagonal_svg/2 + ', ' + this.diagonal_svg/2 + ')')
           // .attr('opacity', (d) => {return d.depth < 2 ? 1 : 0})
-          .on("click", (d) => {
+          .on("click", (d, i) => {
             let uniqSgrna:string[];
             if(d.hasOwnProperty('children')) {
               uniqSgrna= findSgrnaChildren(d.children);
-              console.log(uniqSgrna)
             } else   {
               uniqSgrna = Object.keys(d.data.children);
-              console.log(uniqSgrna);
             }
             this.subSgrna = uniqSgrna;
             this.sgrnaSelected = "";
+            let pathSelected = this.element.shadowRoot.querySelector(`svg>.sunburst>path`) as HTMLElement;
+            pathSelected.style.fill =  'red';
+            this.selectedSection = i;
           });
 
     // Text
@@ -410,9 +427,9 @@ export class MyComponent {
 
           <div class="select-menu">
             <span>sgRNA</span>
-            <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna.length == 0) ? "none" : "rgba(244, 230, 138, 0.2)"}}>
+            <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna == undefined) ? "none" : "rgba(91, 176, 229, 0.7)"}}>
               <option>  </option>
-              {(this.subSgrna.length == 0) ?
+              {(this.subSgrna == undefined) ?
                 (this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)) :
                 (this.subSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>))
               }

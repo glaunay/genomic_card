@@ -37,3 +37,7 @@ div.tooltip {
   stroke: #E8E8E8;
   stroke-width: 1px;
 }
+
+.sunburst>path:hover, .genomeCircle>path:hover{
+  cursor: pointer;
+}
