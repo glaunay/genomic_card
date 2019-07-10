@@ -53,6 +53,7 @@
   line-height: 1.3em;
   border-style: inset;
   border-width: thin;
+  border-radius: 8px;
 }
 
 
@@ -63,7 +64,7 @@
 .help:hover .help-text{
   display: block;
   position: absolute;
-  background: steelblue;
+  background: rgba(103, 203, 222, 0.9);
   border-radius: 8px;
   padding: 8px;
 
@@ -77,7 +78,19 @@
   display: none;
 }
 
+.nav-tabs .nav-link.active{
+  color: rgba(79, 93, 117) !important;
+}
 
-  padding-top: 12px;
-  padding-left: 225px;
-  margin-bottom: auto;
+.nav-link{
+  color: rgba(239, 71, 111) !important;
+}
+
+.nav-link:hover{
+  background: rgba(187, 136, 137, 0.3) !important;
+  color: rgba(79, 93, 117) !important;
+}
+
+.nav-tabs .nav-link.active:hover{
+  background: none !important;
+}

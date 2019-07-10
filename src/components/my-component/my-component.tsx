@@ -255,14 +255,14 @@ export class MyComponent {
             if(this.selectedSection == -1) {
               // Specific color for zero
               if (d.data['weight'] == 0) {
-                return "rgba(166, 165, 134, 0.75)";
+                return "rgba(226, 210, 186, 0.46)";
               }else {
                 return color(d.data['weight']);
               }
             } else if (i == this.selectedSection){
-              return "rgba(91, 176, 229, 0.9)";
+              return "rgba(78, 195, 236, 0.9)";
             } else {
-              return "rgba(199, 197, 182, 0.9)";
+              return "rgba(226, 210, 186, 0.46)";
             }
           })
           // @ts-ignore
@@ -460,7 +460,7 @@ export class MyComponent {
 
               <div class="select-menu">
                 <span>sgRNA</span>
-                <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna == undefined) ? "none" : "rgba(91, 176, 229, 0.7)"}}>
+                <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna == undefined) ? "none" : "rgba(78, 195, 236, 0.2)"}}>
                   <option>  </option>
                   {(this.subSgrna == undefined) ?
                     (this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)) :
@@ -526,5 +526,5 @@ function DisplayGenome (root, width, height) {
     .append('path')
     .attr('d', pathGenome)
     .attr('transform', 'translate(' + width/2 + ', ' + height/2 + ')')
-    .style('fill', 'steelblue');
+    .style('fill', 'rgba(79, 93, 117)');
 }
