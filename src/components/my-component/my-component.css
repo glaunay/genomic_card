@@ -12,7 +12,7 @@
 }
 
 /*  Tooltip for coordinates*/
-div.tooltip {
+.tooltip-coord {
     position: absolute;
     text-align: left;
     width: 220px;
@@ -40,4 +40,14 @@ div.tooltip {
 
 .sunburst>path:hover, .genomeCircle>path:hover{
   cursor: pointer;
+}
+
+.coordBox {
+  padding: 22px 0px 0px 20px;
+  margin-bottom: 17px;
+  height: 140px;
+  width: 35%;
+  overflow: scroll;
+  white-space: pre-line;
+  line-height: 1.3em;
 }

@@ -112,7 +112,7 @@ export class MyComponent {
     this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
       this.subSgrna = undefined;
       this.selectedSection = -1;
-      this.sgrnaSelected = "";
+      this.sgrnaSelected = undefined;
       console.log("Click on whole genome");
     })
   }
@@ -120,10 +120,12 @@ export class MyComponent {
   componentDidLoad() {
     DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
     this.generatePlot();
-    this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
-      this.subSgrna = undefined;
-      console.log("Click on whole genome");
-    })
+    if(this.element.shadowRoot.querySelector('.genomeCircle') != null) {
+      this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
+        this.subSgrna = undefined;
+        console.log("Click on whole genome");
+      })
+    }
   }
 
 
@@ -142,10 +144,12 @@ export class MyComponent {
       data[i].sgRNA = this.sgrnaSelected;
     }
     // Div for the box containing coordinates
-    let div = d3.select('body')
+    let div = d3.select(this.element.shadowRoot.querySelector(".genomeGraph"))
     .append('div')
-    .attr('class', 'tooltip')
-    .style('opacity', 0);
+    .attr('class', 'tooltip-coord')
+    // .style('tooltip', 0)
+    .style("position", "absolute")
+    .style("display", "none");
     // Generator arc for one sgRNA
     let pathSgRNA = d3.arc()
       .innerRadius(width*15/100 + width*2/100)
@@ -163,9 +167,11 @@ export class MyComponent {
       .style('fill', 'red')
       // When mouse is over the sgRNA, show the box
       .on('mouseover', (d) => {
+        div.style("display", "block");
+
         div.transition()
           .duration(500)
-          .style('opacity', '.9');
+          // .style('opacity', '.9');
         div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="fas fa-map-signs"></i> &nbsp; Direction : ' + d.direction + '</br>' +
                  ' &nbsp;&nbsp; <i class="fas fa-play"></i> &nbsp; Start : ' + d.start + '</br>' +
                  ' &nbsp;&nbsp; <i class="fas fa-hand-paper"></i> &nbsp; Stop : ' + (+d.sgRNA.length + +d.start))
@@ -175,8 +181,8 @@ export class MyComponent {
       // When mouse is out, hide the box
       .on('mouseout', () => {
         div.transition()
-          .duration(500)
-          .style('opacity', 0);
+          .duration(50000)
+          .style('display', "none");
       })
       ;
       // Add the arc for the sgRNA
@@ -267,9 +273,7 @@ export class MyComponent {
               uniqSgrna = Object.keys(d.data.children);
             }
             this.subSgrna = uniqSgrna;
-            this.sgrnaSelected = "";
-            let pathSelected = this.element.shadowRoot.querySelector(`svg>.sunburst>path`) as HTMLElement;
-            pathSelected.style.fill =  'red';
+            this.sgrnaSelected = undefined;
             this.selectedSection = i;
           });
 
@@ -370,9 +374,15 @@ export class MyComponent {
 
 // *************************** DISPLAY ***************************
   showCoord() {
-    let dataOneSgrna = this.show_data[this.sgrnaSelected]
-    console.log(dataOneSgrna);
-    return this.sgrnaSelected;
+    if(this.sgrnaSelected == undefined){
+      return "";
+    }
+    let dataOneSgrna = this.show_data[this.sgrnaSelected];
+    let text = this.sgrnaSelected + "\n";
+    dataOneSgrna.forEach(coord => {
+      text += coord + "\n";
+    })
+    return (text);
   }
 
   render() {
@@ -396,71 +406,79 @@ export class MyComponent {
     }
 
     let displayLoad=styleDisplay[0], displayGenomeCard=styleDisplay[1];
-
+    if (this.all_data == undefined) {
     return ([
       <div style={{display: displayLoad}}>
         <strong> Loading ... </strong>
         <div class="spinner-grow text-info" role="status">
           <span class="sr-only">Loading...</span>
         </div>
-      </div>,
+      </div>])
+    }else{
+        return([
+          /* ************************************************************* */
+          /* ************* Main component with menu and card ************* */
+          /* ************************************************************* */
 
-      /* ************************************************************* */
-      /* ************* Main component with menu and card ************* */
-      /* ************************************************************* */
-
-      /* ************* Menu ************* */
-      <div class="main-genome-card" style={{display: displayGenomeCard}}>
-         {/* ************* Tab menu *************  */}
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-        {tabOrgName.map(name => {
-          let classTag: string="nav-link", bool: string="false";
-          if (name == this.orgSelected) {
-            classTag = "nav-link active";
-            bool = "true";
-          }
-          return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.emitOrgChange}> {name} </a> </li>
-        })}
-        </ul>
-        {/* ************* Menu for References and sgRNA ************* */}
-        <div class="tab-content genomeGraph" id="myTabContent" >
-          <div class="select-menu">
-            <span>References</span>
-            <select class="custom-select" onChange={e => this.emitRefChange(e)}>
-              {this.genomeRef.map(ref => <option>{ref}</option>)}
-            </select>
-          </div>
-
-          <div class="select-menu">
-            <span>sgRNA</span>
-            <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna == undefined) ? "none" : "rgba(91, 176, 229, 0.7)"}}>
-              <option>  </option>
-              {(this.subSgrna == undefined) ?
-                (this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)) :
-                (this.subSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>))
+          /* ************* Menu ************* */
+          <div class="main-genome-card" style={{display: displayGenomeCard}}>
+             {/* ************* Tab menu *************  */}
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+            {tabOrgName.map(name => {
+              let classTag: string="nav-link", bool: string="false";
+              if (name == this.orgSelected) {
+                classTag = "nav-link active";
+                bool = "true";
               }
-            </select>
-          </div>
+              return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.emitOrgChange}> {name} </a> </li>
+            })}
+            </ul>
+            {/* ************* Menu for References and sgRNA ************* */}
+            <div class="tab-content genomeGraph" id="myTabContent" >
+            <div class="test" style={{float:"left"}}>
+              <div class="select-menu">
+                <span>References</span>
+                <select class="custom-select" onChange={e => this.emitRefChange(e)}>
+                  {this.genomeRef.map(ref => <option>{ref}</option>)}
+                </select>
+              </div>
 
-          <div class="coordBox">
-            {this.showCoord()}
-          </div>
-           {/* ************* Card *************  */}
-          <svg id='displayGenomicCard' width={this.diagonal_svg} height={this.diagonal_svg}>
-            {this.generateGenomicCard()}
-            <text transform= {`translate(${this.diagonal_svg/2 - 30} , ${this.diagonal_svg/2})`}> {this.sizeSelected} pb </text>
-          </svg>
+              <div class="select-menu">
+                <span>sgRNA</span>
+                <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna == undefined) ? "none" : "rgba(91, 176, 229, 0.7)"}}>
+                  <option>  </option>
+                  {(this.subSgrna == undefined) ?
+                    (this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)) :
+                    (this.subSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>))
+                  }
+                </select>
+              </div>
+              </div>
 
-           {/* ************* Plot *************  */}
-           {this.generatePlot()}
 
-        </div>
-      </div>,
-      // @ts-ignore
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
-      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>,
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>,
-])
+              <div class="coordBox">
+              {console.log(this.sgrnaSelected != undefined)}
+                {this.showCoord()}
+              </div>
+               {/* ************* Card *************  */}
+              <svg id='displayGenomicCard' width={this.diagonal_svg} height={this.diagonal_svg}>
+                {this.generateGenomicCard()}
+                <text transform= {`translate(${this.diagonal_svg/2 - 30} , ${this.diagonal_svg/2})`}> {this.sizeSelected} pb </text>
+              </svg>
+
+               {/* ************* Plot *************  */}
+               {this.generatePlot()}
+
+            </div>
+          </div>,
+          // @ts-ignore
+          <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
+          <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>,
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>,
+    ])
+      }
+
+
   }
 }
 
