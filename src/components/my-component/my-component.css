@@ -94,3 +94,7 @@
 .nav-tabs .nav-link.active:hover{
   background: none !important;
 }
+
+.svg{
+  position: relative;
+}
