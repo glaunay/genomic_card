@@ -115,6 +115,8 @@ export class MyComponent {
       this.sgrnaSelected = undefined;
       console.log("Click on whole genome");
     })
+    this.styleHelp(".genomeCircle>path", ".help-gen");
+    this.styleHelp(".sunburst>path", ".help-section");
   }
 
   componentDidLoad() {
@@ -126,6 +128,8 @@ export class MyComponent {
         console.log("Click on whole genome");
       })
     }
+    this.styleHelp(".genomeCircle>path", ".help-gen");
+    this.styleHelp(".sunburst>path", ".help-section");
   }
 
 
@@ -172,9 +176,9 @@ export class MyComponent {
         div.transition()
           .duration(500)
           // .style('opacity', '.9');
-        div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="fas fa-map-signs"></i> &nbsp; Direction : ' + d.direction + '</br>' +
-                 ' &nbsp;&nbsp; <i class="fas fa-play"></i> &nbsp; Start : ' + d.start + '</br>' +
-                 ' &nbsp;&nbsp; <i class="fas fa-hand-paper"></i> &nbsp; Stop : ' + (+d.sgRNA.length + +d.start))
+        div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="material-icons">directions</i> &nbsp; Direction : ' + d.direction + '</br>' +
+                 ' &nbsp;&nbsp; <i class="material-icons">play_arrow</i> &nbsp; Start : ' + d.start + '</br>' +
+                 ' &nbsp;&nbsp; <i class="material-icons">stop</i> &nbsp; Stop : ' + (+d.sgRNA.length + +d.start))
           .style('left', (d3.event.pageX) + 'px')
           .style('top', (d3.event.pageY) + 'px');
       })
@@ -378,11 +382,20 @@ export class MyComponent {
       return "";
     }
     let dataOneSgrna = this.show_data[this.sgrnaSelected];
-    let text = this.sgrnaSelected + "\n";
+    let text = this.sgrnaSelected + " : " + dataOneSgrna.length +  "\n";
     dataOneSgrna.forEach(coord => {
       text += coord + "\n";
     })
     return (text);
+  }
+
+  styleHelp(ref:string, target:string){
+    if(this.element.shadowRoot.querySelector(ref) != null){
+      var coordGen = this.element.shadowRoot.querySelector(ref).getBoundingClientRect();
+      console.log(coordGen.top.toString());
+      (this.element.shadowRoot.querySelector(target) as HTMLElement).style.top = coordGen.top.toString() + "px";
+      (this.element.shadowRoot.querySelector(target) as HTMLElement).style.left = coordGen.left.toString() + "px";
+    }
   }
 
   render() {
@@ -416,6 +429,8 @@ export class MyComponent {
       </div>])
     }else{
         return([
+          <head><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+          </head>,
           /* ************************************************************* */
           /* ************* Main component with menu and card ************* */
           /* ************************************************************* */
@@ -456,10 +471,20 @@ export class MyComponent {
               </div>
 
 
-              <div class="coordBox">
-              {console.log(this.sgrnaSelected != undefined)}
-                {this.showCoord()}
+              <div>
+                <p style={{padding:"12px 0px 0px 225px", margin:"Opx 0px 5px 0px"}}> <strong> Coordinates Box </strong></p>
+                <p class="coordBox">
+                  {this.showCoord()}
+                </p>
               </div>
+              <div class="help">
+                <i class="material-icons">help</i>
+                <div class="help-text help-gen"> Click on me to reinitialize sgRNA </div>
+                <div class="help-text help-section"> Click on me to display only sgRNA which are on me </div>
+
+              </div>
+
+
                {/* ************* Card *************  */}
               <svg id='displayGenomicCard' width={this.diagonal_svg} height={this.diagonal_svg}>
                 {this.generateGenomicCard()}
