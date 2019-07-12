@@ -36,6 +36,7 @@ declare namespace LocalJSX {
     'onChangeOrgCard'?: (event: CustomEvent<any>) => void;
     'onChangeRefCard'?: (event: CustomEvent<any>) => void;
     'onChangeSgrnaCard'?: (event: CustomEvent<any>) => void;
+    'onSgDataSection'?: (event: CustomEvent<any>) => void;
     'org_names'?: string;
   }
 

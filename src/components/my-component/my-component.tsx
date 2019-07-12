@@ -79,8 +79,7 @@ export class MyComponent {
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
     this.subSgrna = undefined;
     this.selectedSection = -1;
-    const test = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
-    console.log(test);
+    new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
   }
 
   @Listen('changeSgrnaCard')
@@ -106,6 +105,17 @@ export class MyComponent {
     this.changeSgrnaCard.emit(val);
   }
 
+  @Event() sgDataSection: EventEmitter;
+  emitsgData(event: Object){
+    let msg = {allSgnra: JSON.stringify(event)}
+    this.sgDataSection.emit(msg);
+  }
+
+  @Listen('sgDataSection')
+  handleTest(event: CustomEvent) {
+    console.log("************************\n RECU\n*$$$$$$$$$$$")
+    console.log(event.detail["allSgnra"]);
+  }
 
 // *************************** GENOMIC CARD ***************************
   componentDidUpdate() {
@@ -196,7 +206,6 @@ export class MyComponent {
         datum.startAngle = 2*Math.PI * datum.start * (1/sizeGenome);
         let endAngle = 2*Math.PI * end * (1/sizeGenome)  ;
         datum.endAngle = (Math.abs(endAngle - datum.startAngle) < 0.01) ? endAngle + 0.01 : endAngle;
-        console.log(datum.startAngle + '    FIN:    ' + datum.endAngle);
         return d3.select(this)
                 .transition()
                   .ease(d3.easeBackInOut)
@@ -211,8 +220,7 @@ export class MyComponent {
     const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 7);
     const radius = this.diagonal_svg*10/100 + this.diagonal_svg*15/100, padInnerRadisu = this.diagonal_svg*10/100 + this.diagonal_svg*10/100;
     const root = d3.partition().size([2*Math.PI, radius])(d3.hierarchy(treeClustering.root).sum((d) => d['niv']));
-    let maxChild = Math.max(...treeClustering.root['children'].map(o => {console.log(o.weight); return o.weight}));
-    console.log(root)
+    let maxChild = Math.max(...treeClustering.root['children'].map(o => {return o.weight}));
     const arc =d3.arc()
         .startAngle(d =>  d['x0'])
         .endAngle(d => d['x1'])
@@ -279,6 +287,13 @@ export class MyComponent {
             this.subSgrna = uniqSgrna;
             this.sgrnaSelected = undefined;
             this.selectedSection = i;
+            let subData={};
+            Object.keys(this.show_data).forEach(e => {
+              if(this.subSgrna.includes(e)){
+                subData[e] = this.show_data[e];
+              }
+            });
+            this.emitsgData(subData);
           });
 
     // Text
@@ -392,7 +407,6 @@ export class MyComponent {
   styleHelp(ref:string, target:string){
     if(this.element.shadowRoot.querySelector(ref) != null){
       var coordGen = this.element.shadowRoot.querySelector(ref).getBoundingClientRect();
-      console.log(coordGen.top.toString());
       (this.element.shadowRoot.querySelector(target) as HTMLElement).style.top = coordGen.top.toString() + "px";
       (this.element.shadowRoot.querySelector(target) as HTMLElement).style.left = coordGen.left.toString() + "px";
     }
