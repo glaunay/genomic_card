@@ -16,7 +16,7 @@ export class MyComponent {
   @State() genomeRef: string[];
 
   @State() subSgrna: string[];
-  @State() selectedSection = -1;;
+  @State() selectedSection = -1;
 
   @State() orgSelected:string;
   @State() refSelected:string;
@@ -147,12 +147,12 @@ export class MyComponent {
     let width = this.diagonal_svg, height = this.diagonal_svg;
     DisplayGenome(this.element.shadowRoot, width, height);
     if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
-    console.log("Loaded")
+    console.log("Loaded");
     var sizeGenome = this.sizeSelected;
     let data = [];
-    let dataOneSgrna = this.show_data[this.sgrnaSelected]
+    let dataOneSgrna = this.show_data[this.sgrnaSelected];
     for (var i in dataOneSgrna) {
-      data[i] = {}
+      data[i] = {};
       data[i].direction = dataOneSgrna[i].match('[+-]')[0];
       data[i].start = /\(([0-9]*),/.exec(dataOneSgrna[i])[1];
       data[i].sgRNA = this.sgrnaSelected;
@@ -211,7 +211,7 @@ export class MyComponent {
                   .ease(d3.easeBackInOut)
                   .duration(600)
                   .attr('d', pathSgRNA)
-                  .attr('transform', `translate( ${width / 2} , ${height / 2})`)
+                  .attr('transform', `translate( ${width / 2} , ${height / 2})`);
       }
   }
 
@@ -310,7 +310,7 @@ export class MyComponent {
           return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
         })
         .attr("dy", "0.35em")
-        .text(d => d.data['weight'])
+        .text(d => d.data['weight']);
 
         ///////////////////////////////////////////////////////////////////////////
         //////////////// Create the gradient for the legend ///////////////////////
