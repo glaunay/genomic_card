@@ -107,14 +107,14 @@ export class MyComponent {
 
   @Event() sgDataSection: EventEmitter;
   emitsgData(event: Object){
-    let msg = {allSgnra: JSON.stringify(event)}
+    let msg = {allSgrna: JSON.stringify(event)}
     this.sgDataSection.emit(msg);
   }
 
   @Listen('sgDataSection')
   handleTest(event: CustomEvent) {
     console.log("************************\n RECU\n*$$$$$$$$$$$")
-    console.log(event.detail["allSgnra"]);
+    console.log(event.detail["allSgrna"]);
   }
 
 // *************************** GENOMIC CARD ***************************
