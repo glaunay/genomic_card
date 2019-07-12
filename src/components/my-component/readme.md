@@ -21,6 +21,7 @@
 | `changeOrgCard`   |             | `CustomEvent<any>` |
 | `changeRefCard`   |             | `CustomEvent<any>` |
 | `changeSgrnaCard` |             | `CustomEvent<any>` |
+| `sgDataSection`   |             | `CustomEvent<any>` |
 
 
 ----------------------------------------------
