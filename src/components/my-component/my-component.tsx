@@ -107,10 +107,17 @@ export class MyComponent {
   }
 
   @Event() sgDataSection: EventEmitter;
-  emitsgData(event: Object){
+  emitsgData(event: Object, min:number, max:number){
     let geneParsed = JSON.parse(this.gene);
+    let geneOnSection = [];
+    geneParsed[this.orgSelected][this.refSelected].forEach(gene => {
+      if((parseInt(gene.start) >= min && parseInt(gene.start) <= max) ||
+         (parseInt(gene.end) >= min && parseInt(gene.end) <= max)){
+        geneOnSection.push(gene);
+      }
+    })
     let msg = {allSgrna: JSON.stringify(event),
-               gene: JSON.stringify(geneParsed[this.orgSelected][this.refSelected])}
+               gene: JSON.stringify(geneOnSection)}
     this.sgDataSection.emit(msg);
   }
 
@@ -298,7 +305,7 @@ export class MyComponent {
                 subData[e] = this.show_data[e];
               }
             });
-            if(this.gene != undefined) this.emitsgData(subData);
+            if(this.gene != undefined) this.emitsgData(subData, parseFloat(d.data.min), parseFloat(d.data.max));
           });
 
     // Text
