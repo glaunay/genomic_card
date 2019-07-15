@@ -12,6 +12,7 @@ export namespace Components {
   interface GenomicCard {
     'all_data': string;
     'diagonal_svg': number;
+    'gene': string;
     'org_names': string;
   }
 }
@@ -33,6 +34,7 @@ declare namespace LocalJSX {
   interface GenomicCard extends JSXBase.HTMLAttributes<HTMLGenomicCardElement> {
     'all_data'?: string;
     'diagonal_svg'?: number;
+    'gene'?: string;
     'onChangeOrgCard'?: (event: CustomEvent<any>) => void;
     'onChangeRefCard'?: (event: CustomEvent<any>) => void;
     'onChangeSgrnaCard'?: (event: CustomEvent<any>) => void;

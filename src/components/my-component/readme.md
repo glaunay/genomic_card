@@ -11,6 +11,7 @@
 | -------------- | -------------- | ----------- | -------- | ----------- |
 | `all_data`     | `all_data`     |             | `string` | `undefined` |
 | `diagonal_svg` | `diagonal_svg` |             | `number` | `undefined` |
+| `gene`         | `gene`         |             | `string` | `undefined` |
 | `org_names`    | `org_names`    |             | `string` | `undefined` |
 
 

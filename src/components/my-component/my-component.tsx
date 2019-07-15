@@ -26,6 +26,7 @@ export class MyComponent {
   @Prop() org_names: string;
   @Prop() diagonal_svg: number;
   @Prop() all_data: string;
+  @Prop() gene: string;
 
 
   constructor() {
@@ -107,14 +108,18 @@ export class MyComponent {
 
   @Event() sgDataSection: EventEmitter;
   emitsgData(event: Object){
-    let msg = {allSgrna: JSON.stringify(event)}
+    let geneParsed = JSON.parse(this.gene);
+    let msg = {allSgrna: JSON.stringify(event),
+               gene: JSON.stringify(geneParsed[this.orgSelected][this.refSelected])}
     this.sgDataSection.emit(msg);
   }
 
   @Listen('sgDataSection')
   handleTest(event: CustomEvent) {
     console.log("************************\n RECU\n*$$$$$$$$$$$")
-    console.log(event.detail["allSgrna"]);
+    // console.log(event.detail["allSgrna"]);
+    console.log(event.detail["gene"]);
+
   }
 
 // *************************** GENOMIC CARD ***************************
@@ -293,7 +298,7 @@ export class MyComponent {
                 subData[e] = this.show_data[e];
               }
             });
-            this.emitsgData(subData);
+            if(this.gene != undefined) this.emitsgData(subData);
           });
 
     // Text
