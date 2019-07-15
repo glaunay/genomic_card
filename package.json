@@ -1,6 +1,6 @@
 {
   "name": "@mmsb/genomic-card",
-  "version": "0.0.15",
+  "version": "1.0.0",
   "description": "Stencil Component Starter",
   "module": "dist/esm/index.js",
   "main": "dist/index.js",
