@@ -121,21 +121,12 @@ export class MyComponent {
     this.sgDataSection.emit(msg);
   }
 
-  @Listen('sgDataSection')
-  handleTest(event: CustomEvent) {
-    console.log("************************\n RECU\n*$$$$$$$$$$$")
-    // console.log(event.detail["allSgrna"]);
-    console.log(event.detail["gene"]);
-
-  }
-
 // *************************** GENOMIC CARD ***************************
   componentDidUpdate() {
     this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
       this.subSgrna = undefined;
       this.selectedSection = -1;
       this.sgrnaSelected = undefined;
-      console.log("Click on whole genome");
     })
     this.styleHelp(".genomeCircle>path", ".help-gen");
     this.styleHelp(".sunburst>path", ".help-section");
@@ -147,7 +138,6 @@ export class MyComponent {
     if(this.element.shadowRoot.querySelector('.genomeCircle') != null) {
       this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
         this.subSgrna = undefined;
-        console.log("Click on whole genome");
       })
     }
     this.styleHelp(".genomeCircle>path", ".help-gen");
@@ -159,7 +149,6 @@ export class MyComponent {
     let width = this.diagonal_svg, height = this.diagonal_svg;
     DisplayGenome(this.element.shadowRoot, width, height);
     if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
-    console.log("Loaded");
     var sizeGenome = this.sizeSelected;
     let data = [];
     let dataOneSgrna = this.show_data[this.sgrnaSelected];
@@ -425,7 +414,6 @@ export class MyComponent {
   }
 
   render() {
-    console.log("render called");
     let tabOrgName = this.org_names.split("&");
 
     let styleDisplay: string[], all_data;
