@@ -486,7 +486,7 @@ export class MyComponent {
 
 
               <div>
-                <p style={{padding:"12px 0px 0px 225px", margin:"Opx 0px 5px 0px"}}> <strong> Coordinates Box </strong></p>
+                <p style={{padding:"12px 0px 0px 230px", margin:"Opx 0px 5px 0px"}}> <strong> Coordinates Box </strong></p>
                 <p class="coordBox">
                   {this.showCoord()}
                 </p>
