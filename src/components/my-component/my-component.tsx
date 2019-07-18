@@ -14,6 +14,7 @@ export class MyComponent {
   @State() show_data: any;
   @State() allSgrna: string[] = [];
   @State() genomeRef: string[];
+  @State() allSize:Object;
 
   @State() subSgrna: string[];
   @State() selectedSection = -1;
@@ -27,6 +28,7 @@ export class MyComponent {
   @Prop() diagonal_svg: number;
   @Prop() all_data: string;
   @Prop() gene: string;
+  @Prop() size:string;
 
 
   constructor() {
@@ -53,6 +55,7 @@ export class MyComponent {
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
     this.subSgrna = undefined;
     this.selectedSection = -1;
+    (this.allSize == undefined) ? this.sizeSelected = 4518734 : this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
     new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
     console.log(`CLICK on ${this.orgSelected}`);
   }
@@ -69,6 +72,7 @@ export class MyComponent {
     this.genomeRef = Object.keys(all_data[this.orgSelected]);
     this.show_data = all_data[this.orgSelected][this.refSelected];
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+    (this.allSize == undefined) ? this.sizeSelected = 4518734 : this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
     new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
   }
 
@@ -80,6 +84,7 @@ export class MyComponent {
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
     this.subSgrna = undefined;
     this.selectedSection = -1;
+    (this.allSize == undefined) ? this.sizeSelected = 4518734 : this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
     new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
   }
 
@@ -133,6 +138,12 @@ export class MyComponent {
   }
 
   componentDidLoad() {
+      if (this.size != undefined){
+        this.allSize = JSON.parse(this.size)
+        this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
+      }else {
+        this.sizeSelected = 4518734
+      }
     DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
     this.generatePlot();
     if(this.element.shadowRoot.querySelector('.genomeCircle') != null) {
@@ -412,9 +423,19 @@ export class MyComponent {
       (this.element.shadowRoot.querySelector(target) as HTMLElement).style.left = coordGen.left.toString() + "px";
     }
   }
+  // componentDidRender(){
+  //   if (this.size != undefined){
+  //     this.allSize = JSON.parse(this.size)
+  //     this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
+  //   }else {
+  //     this.sizeSelected = 4518734
+  //   }
+  // }
+
 
   render() {
     let tabOrgName = this.org_names.split("&");
+
 
     let styleDisplay: string[], all_data;
     if (this.all_data == undefined) {
@@ -429,6 +450,7 @@ export class MyComponent {
         this.refSelected = this.genomeRef[0];
         this.show_data = all_data[this.orgSelected][this.refSelected];
         this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+
       }
     }
 

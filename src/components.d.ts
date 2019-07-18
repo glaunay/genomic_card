@@ -14,6 +14,7 @@ export namespace Components {
     'diagonal_svg': number;
     'gene': string;
     'org_names': string;
+    'size': string;
   }
 }
 
@@ -40,6 +41,7 @@ declare namespace LocalJSX {
     'onChangeSgrnaCard'?: (event: CustomEvent<any>) => void;
     'onSgDataSection'?: (event: CustomEvent<any>) => void;
     'org_names'?: string;
+    'size'?: string;
   }
 
   interface IntrinsicElements {
