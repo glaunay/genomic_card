@@ -254,7 +254,7 @@ export class MyComponent {
       }
     DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
     this.generateGenomicCard();
-    dspl.generateSunburst(this.sizeSelected, this.show_data, this.diagonal_svg, this.element.shadowRoot.querySelector('#displayGenomicCard'), this.selectedSection, this.gene);
+    dspl.generateSunburst(this.sizeSelected, this.show_data, this.diagonal_svg, this.element.shadowRoot.querySelector('#displayGenomicCard'), this.selectedSection, this.gene != undefined ? true : false);
 
     if(this.element.shadowRoot.querySelector('.genomeCircle') != null) {
       this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
@@ -358,7 +358,7 @@ export class MyComponent {
             </svg>
 
              {/* ************* Plot *************  */}
-             {dspl.generateSunburst(this.sizeSelected, this.show_data, this.diagonal_svg, this.element.shadowRoot.querySelector('#displayGenomicCard'), this.selectedSection, this.gene)}
+             {dspl.generateSunburst(this.sizeSelected, this.show_data, this.diagonal_svg, this.element.shadowRoot.querySelector('#displayGenomicCard'), this.selectedSection, this.gene != undefined ? true : false)}
 
           </div>
         </div>,
