@@ -17,14 +17,15 @@
     "test.watch": "stencil test --spec --e2e --watchAll"
   },
   "dependencies": {
+    "@mmsb/mmsb-select": "0.0.8",
     "@types/d3": "^5.7.2",
-    "d3": "^5.9.2",
+    "d3": "^5.9.7",
     "font-awesome": "^4.7.0",
     "jquery": "^3.4.1",
     "popper.js": "^1.15.0"
   },
   "devDependencies": {
-    "@stencil/core": "^1.1.4"
+    "@stencil/core": "^1.1.7"
   },
   "license": "MIT"
 }
