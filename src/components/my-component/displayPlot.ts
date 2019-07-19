@@ -11,7 +11,6 @@ import * as d3 from "d3";
 * @param {number} coloredSection Index of the section which must be colored
 * @param {boolean} sendLimits_bool Send or not the subdata in the selected section with limits
 * @returns {Object} The svg node
-
 */
 export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:number, pathDiv:HTMLElement, coloredSection:number, sendLimits_bool=false ):Object {
   const options = {
@@ -200,4 +199,83 @@ export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:num
       .attr("transform", "translate(0," + (10) + ")")
       .call(xAxis);
   return svg.node();
+}
+
+
+/**
+* Display the genome by a blue circle
+* @param {function} Function to display the inside circle
+* @param {number} diagonalSVG Size in pixel of the svg
+* @param {number} sizeCircle Size of the circle
+* @param {ShadowRoot} pathDiv HTMLElement where the svg must be added
+* @param {Object} dataSticks Dicitonary to create sticks
+* @param {string} labelSticks Label of sticks represented
+*/
+export function generateGenomicCard(DisplayGenome:Function, diagonalSVG:number, sizeCircle:number, pathDiv:ShadowRoot, dataSticks:Object, labelSticks:string):void {
+  let width = diagonalSVG, height = diagonalSVG;
+  DisplayGenome(pathDiv, width, height);
+  var sizeGenome = sizeCircle;
+  let data = [];
+  for (var i in dataSticks) {
+    data[i] = {};
+    data[i].direction = dataSticks[i].match('[+-]')[0];
+    data[i].start = /\(([0-9]*),/.exec(dataSticks[i])[1];
+    data[i].sgRNA = labelSticks;
+  }
+  // Div for the box containing coordinates
+  let div = d3.select(pathDiv.querySelector(".genomeGraph"))
+  .append('div')
+  .attr('class', 'tooltip-coord')
+  // .style('tooltip', 0)
+  .style("position", "absolute")
+  .style("display", "none");
+  // Generator arc for one sgRNA
+  let pathSgRNA = d3.arc()
+    .innerRadius(width*15/100 + width*2/100)
+    .outerRadius(width*15/100 + width*3.5/100);
+
+  // Draw sgRNA
+  d3.select(pathDiv.querySelector('svg'))
+    .append('g')
+    .selectAll('path')
+    .data(data)
+    .enter()
+    .append('path')
+    // Draw and add animation for sgRNA
+    .each(arcFunction)
+    .style('fill', 'red')
+    // When mouse is over the sgRNA, show the box
+    .on('mouseover', (d) => {
+      div.style("display", "block");
+
+      div.transition()
+        .duration(500)
+        // .style('opacity', '.9');
+      div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="material-icons">directions</i> &nbsp; Direction : ' + d.direction + '</br>' +
+               ' &nbsp;&nbsp; <i class="material-icons">play_arrow</i> &nbsp; Start : ' + d.start + '</br>' +
+               ' &nbsp;&nbsp; <i class="material-icons">stop</i> &nbsp; Stop : ' + (+d.sgRNA.length + +d.start))
+        .style('left', (d3.event.pageX) + 'px')
+        .style('top', (d3.event.pageY) + 'px');
+    })
+    // When mouse is out, hide the box
+    .on('mouseout', () => {
+      div.transition()
+        .duration(50000)
+        .style('display', "none");
+    })
+    ;
+  // Add the arc for the sgRNA
+  // The animation to place sgRNA
+  function arcFunction(datum){
+    let end: number = +datum.sgRNA.length + +datum.start;
+    datum.startAngle = 2*Math.PI * datum.start * (1/sizeGenome);
+    let endAngle = 2*Math.PI * end * (1/sizeGenome)  ;
+    datum.endAngle = (Math.abs(endAngle - datum.startAngle) < 0.01) ? endAngle + 0.01 : endAngle;
+    return d3.select(this)
+            .transition()
+              .ease(d3.easeBackInOut)
+              .duration(600)
+              .attr('d', pathSgRNA)
+              .attr('transform', `translate( ${width / 2} , ${height / 2})`);
+  }
 }

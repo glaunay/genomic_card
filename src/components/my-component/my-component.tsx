@@ -41,7 +41,6 @@ export class MyComponent {
     this.emitOrgChange = this.emitOrgChange.bind(this);
     this.emitRefChange = this.emitRefChange.bind(this);
     this.emitSgrnaChange = this.emitSgrnaChange.bind(this);
-    this.generateGenomicCard = this.generateGenomicCard.bind(this);
   }
 
 // *************************** CLICK ***************************
@@ -130,78 +129,6 @@ export class MyComponent {
   }
 
 // *************************** GENOMIC CARD ***************************
-  generateGenomicCard() {
-    let width = this.diagonal_svg, height = this.diagonal_svg;
-    DisplayGenome(this.element.shadowRoot, width, height);
-    var sizeGenome = this.sizeSelected;
-    let data = [];
-    let dataOneSgrna = this.show_data[this.sgrnaSelected];
-    for (var i in dataOneSgrna) {
-      data[i] = {};
-      data[i].direction = dataOneSgrna[i].match('[+-]')[0];
-      data[i].start = /\(([0-9]*),/.exec(dataOneSgrna[i])[1];
-      data[i].sgRNA = this.sgrnaSelected;
-    }
-    // Div for the box containing coordinates
-    let div = d3.select(this.element.shadowRoot.querySelector(".genomeGraph"))
-    .append('div')
-    .attr('class', 'tooltip-coord')
-    // .style('tooltip', 0)
-    .style("position", "absolute")
-    .style("display", "none");
-    // Generator arc for one sgRNA
-    let pathSgRNA = d3.arc()
-      .innerRadius(width*15/100 + width*2/100)
-      .outerRadius(width*15/100 + width*3.5/100);
-
-    // Draw sgRNA
-    d3.select(this.element.shadowRoot.querySelector('svg'))
-      .append('g')
-      .selectAll('path')
-      .data(data)
-      .enter()
-      .append('path')
-      // Draw and add animation for sgRNA
-      .each(arcFunction)
-      .style('fill', 'red')
-      // When mouse is over the sgRNA, show the box
-      .on('mouseover', (d) => {
-        div.style("display", "block");
-
-        div.transition()
-          .duration(500)
-          // .style('opacity', '.9');
-        div.html('<b>' + d.sgRNA + '</b></br>' + ' &nbsp;&nbsp; <i class="material-icons">directions</i> &nbsp; Direction : ' + d.direction + '</br>' +
-                 ' &nbsp;&nbsp; <i class="material-icons">play_arrow</i> &nbsp; Start : ' + d.start + '</br>' +
-                 ' &nbsp;&nbsp; <i class="material-icons">stop</i> &nbsp; Stop : ' + (+d.sgRNA.length + +d.start))
-          .style('left', (d3.event.pageX) + 'px')
-          .style('top', (d3.event.pageY) + 'px');
-      })
-      // When mouse is out, hide the box
-      .on('mouseout', () => {
-        div.transition()
-          .duration(50000)
-          .style('display', "none");
-      })
-      ;
-    // Add the arc for the sgRNA
-    // The animation to place sgRNA
-    function arcFunction(datum){
-      let end: number = +datum.sgRNA.length + +datum.start;
-      datum.startAngle = 2*Math.PI * datum.start * (1/sizeGenome);
-      let endAngle = 2*Math.PI * end * (1/sizeGenome)  ;
-      datum.endAngle = (Math.abs(endAngle - datum.startAngle) < 0.01) ? endAngle + 0.01 : endAngle;
-      return d3.select(this)
-              .transition()
-                .ease(d3.easeBackInOut)
-                .duration(600)
-                .attr('d', pathSgRNA)
-                .attr('transform', `translate( ${width / 2} , ${height / 2})`);
-    }
-  }
-
-// *************************** SUNBURST **************************
-
 
 
 // *************************** DISPLAY ***************************
@@ -246,14 +173,14 @@ export class MyComponent {
   }
 
   componentDidLoad() {
-      if (this.size != undefined){
-        this.allSize = JSON.parse(this.size)
-        this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
-      }else {
-        this.sizeSelected = 4518734
-      }
+    if (this.size != undefined){
+      this.allSize = JSON.parse(this.size)
+      this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
+    }else {
+      this.sizeSelected = 4518734
+    }
     DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
-    this.generateGenomicCard();
+    dspl.generateGenomicCard(DisplayGenome, this.diagonal_svg, this.sizeSelected, this.element.shadowRoot, this.show_data[this.sgrnaSelected], this.sgrnaSelected);
     dspl.generateSunburst(this.sizeSelected, this.show_data, this.diagonal_svg, this.element.shadowRoot.querySelector('#displayGenomicCard'), this.selectedSection, this.gene != undefined ? true : false);
 
     if(this.element.shadowRoot.querySelector('.genomeCircle') != null) {
@@ -353,13 +280,12 @@ export class MyComponent {
 
              {/* ************* Card *************  */}
             <svg id='displayGenomicCard' width={this.diagonal_svg} height={this.diagonal_svg}>
-              {this.generateGenomicCard()}
+              {dspl.generateGenomicCard(DisplayGenome, this.diagonal_svg, this.sizeSelected, this.element.shadowRoot, this.show_data[this.sgrnaSelected], this.sgrnaSelected)}
               <text transform= {`translate(${this.diagonal_svg/2 - 30} , ${this.diagonal_svg/2})`}> {this.sizeSelected} pb </text>
             </svg>
 
              {/* ************* Plot *************  */}
              {dspl.generateSunburst(this.sizeSelected, this.show_data, this.diagonal_svg, this.element.shadowRoot.querySelector('#displayGenomicCard'), this.selectedSection, this.gene != undefined ? true : false)}
-
           </div>
         </div>,
         ])
