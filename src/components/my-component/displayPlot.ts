@@ -2,15 +2,25 @@ import * as clTree from './clusteringTree';
 import * as d3 from "d3";
 
 
+/**
+* Display the genome by a blue circle
+* @param {number} sizeCircle Size of the circle
+* @param {Object} data Data in dictionary with keys and list as values
+* @param {number} diagonalSVG Size in pixel of the svg
+* @param {HTMLElement} pathDiv HTMLElement where the svg must be added
+* @param {number} coloredSection Index of the section which must be colored
+* @param {boolean} sendLimits_bool Send or not the subdata in the selected section with limits
+* @returns {Object} The svg node
 
-export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:number, pathDiv, coloredSection:number, gene=undefined ) {
+*/
+export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:number, pathDiv:HTMLElement, coloredSection:number, sendLimits_bool=false ):Object {
   const options = {
     sizeCircle: sizeCircle,
     data: data,
     diagonalSVG: diagonalSVG,
     pathDiv: pathDiv,
     coloredSection: coloredSection,
-    gene: gene
+    sendLimits_bool: sendLimits_bool
   }
 
   // raw tree clustering sequences and sections
@@ -75,7 +85,6 @@ export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:num
         // @ts-ignore
         .attr('d', arc)
         .attr('transform', 'translate(' + options.diagonalSVG/2 + ', ' + options.diagonalSVG/2 + ')')
-        // .attr('opacity', (d) => {return d.depth < 2 ? 1 : 0})
         .on("click", (d, i) => {
           let uniqSgrna:string[];
           if(d.hasOwnProperty('children')) {
@@ -87,7 +96,7 @@ export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:num
           var event = new CustomEvent('sectionSelected', {detail : {sgRNA: uniqSgrna, section: i}});
           window.dispatchEvent(event)
 
-          if(options.gene != undefined){
+          if(options.sendLimits_bool){
             let subData={};
             Object.keys(options.data).forEach(e => {
               if(uniqSgrna.includes(e)){
@@ -101,19 +110,19 @@ export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:num
 
   // Text
   svg.append("g")
-  .attr('transform', 'translate(' + options.diagonalSVG/2 + ', ' + options.diagonalSVG/2 + ')')
+      .attr('transform', 'translate(' + options.diagonalSVG/2 + ', ' + options.diagonalSVG/2 + ')')
       .attr("pointer-events", "none")
       .attr("text-anchor", "middle")
-    .selectAll("text")
-    .data(root.descendants().filter(d => d.depth > 0 && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
-    .enter().append("text")
-      .attr("transform", function(d) {
-        const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-        const y = (d.y0 + d.y1) / 2 + padInnerRadius;
-        return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-      })
-      .attr("dy", "0.35em")
-      .text(d => d.data['weight']);
+      .selectAll("text")
+        .data(root.descendants().filter(d => d.depth > 0 && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
+        .enter().append("text")
+          .attr("transform", function(d) {
+            const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+            const y = (d.y0 + d.y1) / 2 + padInnerRadius;
+            return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+          })
+          .attr("dy", "0.35em")
+          .text(d => d.data['weight']);
 
   ///////////////////////////////////////////////////////////////////////////
   //////////////// Create the gradient for the legend ///////////////////////
@@ -121,8 +130,8 @@ export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:num
 
   //Extra scale since the color scale is interpolated
   var tempScale = d3.scaleLinear()
-    .domain([0, maxChild])
-    .range([0, 11]);
+                    .domain([0, maxChild])
+                    .range([0, 11]);
 
   //Calculate the variables for the temp gradient
   var numStops = 10;
@@ -140,12 +149,12 @@ export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:num
     .attr("x1", "0%").attr("y1", "0%")
     .attr("x2", "100%").attr("y2", "0%")
     .selectAll("stop")
-    .data(d3.range(numStops))
-    .enter().append("stop")
-    // @ts-ignore
-    .attr("offset", function(d,i) { return tempScale( tempPoint[i] )/12; })
-    // @ts-ignore
-    .attr("stop-color", function(d,i) { return color( tempPoint[i] ); });
+      .data(d3.range(numStops))
+      .enter().append("stop")
+        // @ts-ignore
+        .attr("offset", function(d,i) { return tempScale( tempPoint[i] )/12; })
+        // @ts-ignore
+        .attr("stop-color", function(d,i) { return color( tempPoint[i] ); });
 
   ///////////////////////////////////////////////////////////////////////////
   ////////////////////////// Draw the legend ////////////////////////////////
@@ -187,8 +196,8 @@ export function generateSunburst(sizeCircle:number, data:Object, diagonalSVG:num
       .tickFormat( (d) => {return d + ""});
   //Set up X axis
   legendsvg.append("g")
-    .attr("class", "axis")
-    .attr("transform", "translate(0," + (10) + ")")
-    .call(xAxis);
+      .attr("class", "axis")
+      .attr("transform", "translate(0," + (10) + ")")
+      .call(xAxis);
   return svg.node();
 }
