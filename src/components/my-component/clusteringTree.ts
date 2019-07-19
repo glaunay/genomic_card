@@ -1,4 +1,4 @@
-export function nbWord(sequences: Object) {
+function nbWord(sequences: Object) {
   // number of total sgRNA
   let sum: number=0;
   for (var i in sequences) {
