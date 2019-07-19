@@ -13,6 +13,7 @@
 | `diagonal_svg` | `diagonal_svg` |             | `number` | `undefined` |
 | `gene`         | `gene`         |             | `string` | `undefined` |
 | `org_names`    | `org_names`    |             | `string` | `undefined` |
+| `size`         | `size`         |             | `string` | `undefined` |
 
 
 ## Events
@@ -24,6 +25,19 @@
 | `changeSgrnaCard` |             | `CustomEvent<any>` |
 | `sgDataSection`   |             | `CustomEvent<any>` |
 
+
+## Dependencies
+
+### Depends on
+
+- mmsb-select
+
+### Graph
+```mermaid
+graph TD;
+  genomic-card --> mmsb-select
+  style genomic-card fill:#f9f,stroke:#333,stroke-width:4px
+```
 
 ----------------------------------------------
 
