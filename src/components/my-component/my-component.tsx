@@ -7,6 +7,7 @@ import * as clTree from './clusteringTree';
   styleUrl: 'my-component.css',
   shadow: true
 })
+
 export class MyComponent {
 // *************************** PROPERTY & CONSTRUCTOR ***************************
   @Element() private element: HTMLElement;
@@ -39,7 +40,6 @@ export class MyComponent {
     this.emitRefChange = this.emitRefChange.bind(this);
     this.emitSgrnaChange = this.emitSgrnaChange.bind(this);
     this.generatePlot = this.generatePlot.bind(this);
-    // this.displayPlot = this.displayPlot.bind(this);
     this.generateGenomicCard = this.generateGenomicCard.bind(this);
   }
 
@@ -229,26 +229,29 @@ export class MyComponent {
 
 // *************************** SUNBURST **************************
   generatePlot() {
+    // raw tree clustering sequences and sections
     const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 7);
-    const radius = this.diagonal_svg*10/100 + this.diagonal_svg*15/100, padInnerRadisu = this.diagonal_svg*10/100 + this.diagonal_svg*10/100;
+    const radius = this.diagonal_svg*10/100 + this.diagonal_svg*15/100, padInnerRadius = this.diagonal_svg*10/100 + this.diagonal_svg*10/100;
+    // root of the treeClustering hierarchical
     const root = d3.partition().size([2*Math.PI, radius])(d3.hierarchy(treeClustering.root).sum((d) => d['niv']));
+    // Find the maximum number of sequences in a section for the color scale
     let maxChild = Math.max(...treeClustering.root['children'].map(o => {return o.weight}));
     const arc =d3.arc()
-        .startAngle(d =>  d['x0'])
-        .endAngle(d => d['x1'])
-        .padAngle(d => Math.min((d['x1'] - d['x0']) / 2, 0.005))
-        .padRadius(radius / 2)
-        .innerRadius(d => d['y0'] + padInnerRadisu)
-        .outerRadius(d => d['y1'] - 1 + padInnerRadisu);
+                .startAngle(d =>  d['x0'])
+                .endAngle(d => d['x1'])
+                .padAngle(d => Math.min((d['x1'] - d['x0']) / 2, 0.005))
+                .padRadius(radius / 2)
+                .innerRadius(d => d['y0'] + padInnerRadius)
+                .outerRadius(d => d['y1'] - 1 + padInnerRadius);
 
     const color = d3.scaleQuantize()
-              .domain([0, maxChild])
-              // @ts-ignore
-              .range(['#F7FACE', '#E0F6BF', '#C1F2B0', '#A3EDAA', '#96E7B9', '#8BE0CD', '#80CDD8', '#6DA7C3', '#5B81AD', '#4A5E95', '#3A3E7D']);
+                    .domain([0, maxChild])
+                    // @ts-ignore
+                    .range(['#F7FACE', '#E0F6BF', '#C1F2B0', '#A3EDAA', '#96E7B9', '#8BE0CD', '#80CDD8', '#6DA7C3', '#5B81AD', '#4A5E95', '#3A3E7D']);
 
     const svg = d3.select(this.element.shadowRoot.querySelector('#displayGenomicCard'));
 
-    function findSgrnaChildren(list_children):string[] {
+    function findSgrnaChildren(list_children:Object):string[] {
       let allSgrna: string[] = [];
 
       for (var i in list_children){
@@ -318,7 +321,7 @@ export class MyComponent {
       .enter().append("text")
         .attr("transform", function(d) {
           const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-          const y = (d.y0 + d.y1) / 2 + padInnerRadisu;
+          const y = (d.y0 + d.y1) / 2 + padInnerRadius;
           return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
         })
         .attr("dy", "0.35em")
@@ -404,7 +407,11 @@ export class MyComponent {
 
 
 // *************************** DISPLAY ***************************
-  showCoord() {
+  /**
+  * Return all coordinates of a given sgRNA if the state is not undefined
+  * @returns {string} The sgRNA, the number of occurences and coordinates
+  */
+  showCoord():string {
     if(this.sgrnaSelected == undefined){
       return "";
     }
@@ -416,6 +423,11 @@ export class MyComponent {
     return (text);
   }
 
+  /**
+  * Display the genome by a blue circle
+  * @param {string} ref The selector where the tooltip must appear
+  * @param {string} target The selector of the tooltip
+  */
   styleHelp(ref:string, target:string){
     if(this.element.shadowRoot.querySelector(ref) != null){
       var coordGen = this.element.shadowRoot.querySelector(ref).getBoundingClientRect();
@@ -423,19 +435,9 @@ export class MyComponent {
       (this.element.shadowRoot.querySelector(target) as HTMLElement).style.left = coordGen.left.toString() + "px";
     }
   }
-  // componentDidRender(){
-  //   if (this.size != undefined){
-  //     this.allSize = JSON.parse(this.size)
-  //     this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
-  //   }else {
-  //     this.sizeSelected = 4518734
-  //   }
-  // }
-
 
   render() {
     let tabOrgName = this.org_names.split("&");
-
 
     let styleDisplay: string[], all_data;
     if (this.all_data == undefined) {
@@ -450,100 +452,104 @@ export class MyComponent {
         this.refSelected = this.genomeRef[0];
         this.show_data = all_data[this.orgSelected][this.refSelected];
         this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
-
       }
     }
 
     let displayLoad=styleDisplay[0], displayGenomeCard=styleDisplay[1];
     if (this.all_data == undefined) {
-    return ([
-      //@ts-ignore
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
-      <div style={{display: displayLoad}}>
-        <strong> Loading ... </strong>
-        <div class="spinner-grow text-info" role="status">
-          <span class="sr-only">Loading...</span>
-        </div>
-      </div>])
+      return ([
+        //@ts-ignore
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>,
+        <div style={{display: displayLoad}}>
+          <strong> Loading ... </strong>
+          <div class="spinner-grow text-info" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>])
     }else{
-        return([
-          <head>
-            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-            //@ts-ignore
-            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>
-          </head>,
-          /* ************************************************************* */
-          /* ************* Main component with menu and card ************* */
-          /* ************************************************************* */
+      return([
+        <head>
+          <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+          //@ts-ignore
+          <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>
+        </head>,
+        /* ************************************************************* */
+        /* ************* Main component with menu and card ************* */
+        /* ************************************************************* */
 
-          /* ************* Menu ************* */
-          <div class="main-genome-card" style={{display: displayGenomeCard}}>
-             {/* ************* Tab menu *************  */}
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-            {tabOrgName.map(name => {
-              let classTag: string="nav-link", bool: string="false";
-              if (name == this.orgSelected) {
-                classTag = "nav-link active";
-                bool = "true";
-              }
-              return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.emitOrgChange}> {name} </a> </li>
-            })}
-            </ul>
-            {/* ************* Menu for References and sgRNA ************* */}
-            <div class="tab-content genomeGraph" id="myTabContent" >
-            <div class="test" style={{float:"left"}}>
-              <div class="select-menu">
-                <span>References</span>
-                <select class="custom-select" onChange={e => this.emitRefChange(e)}>
-                  {this.genomeRef.map(ref => <option>{ref}</option>)}
-                </select>
-              </div>
+        /* ************* Menu ************* */
+        <div class="main-genome-card" style={{display: displayGenomeCard}}>
+           {/* ************* Tab menu *************  */}
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+          {tabOrgName.map(name => {
+            let classTag: string="nav-link", bool: string="false";
+            if (name == this.orgSelected) {
+              classTag = "nav-link active";
+              bool = "true";
+            }
+            return <li class="nav-item"> <a class={classTag} data-toggle="tab" role="tab" aria-selected={bool} href="#" onClick={this.emitOrgChange}> {name} </a> </li>
+          })}
+          </ul>
+          {/* ************* Menu for References and sgRNA ************* */}
+          <div class="tab-content genomeGraph" id="myTabContent" >
+          <div class="test" style={{float:"left"}}>
+            <div class="select-menu">
+              <span>References</span>
+              <select class="custom-select" onChange={e => this.emitRefChange(e)}>
+                {this.genomeRef.map(ref => <option>{ref}</option>)}
+              </select>
+            </div>
 
-              <div class="select-menu">
-                <span>sgRNA</span>
-                <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna == undefined) ? "none" : "rgba(78, 195, 236, 0.2)"}}>
-                  <option>  </option>
-                  {(this.subSgrna == undefined) ?
-                    (this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)) :
-                    (this.subSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>))
-                  }
-                </select>
-              </div>
-              </div>
-
-
-              <div>
-                <p style={{padding:"12px 0px 0px 230px", margin:"Opx 0px 5px 0px"}}> <strong> Coordinates Box </strong></p>
-                <p class="coordBox">
-                  {this.showCoord()}
-                </p>
-              </div>
-              <div class="help">
-                <i class="material-icons">help</i>
-                <div class="help-text help-gen"> Click on me to reinitialize sgRNA </div>
-                <div class="help-text help-section"> Click on me to display only sgRNA which are on me </div>
-
-              </div>
+            <div class="select-menu">
+              <span>sgRNA</span>
+              <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna == undefined) ? "none" : "rgba(78, 195, 236, 0.2)"}}>
+                <option>  </option>
+                {(this.subSgrna == undefined) ?
+                  (this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)) :
+                  (this.subSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>))
+                }
+              </select>
+            </div>
+            </div>
 
 
-               {/* ************* Card *************  */}
-              <svg id='displayGenomicCard' width={this.diagonal_svg} height={this.diagonal_svg}>
-                {this.generateGenomicCard()}
-                <text transform= {`translate(${this.diagonal_svg/2 - 30} , ${this.diagonal_svg/2})`}> {this.sizeSelected} pb </text>
-              </svg>
-
-               {/* ************* Plot *************  */}
-               {this.generatePlot()}
+            <div>
+              <p style={{padding:"12px 0px 0px 230px", margin:"Opx 0px 5px 0px"}}> <strong> Coordinates Box </strong></p>
+              <p class="coordBox">
+                {this.showCoord()}
+              </p>
+            </div>
+            <div class="help">
+              <i class="material-icons">help</i>
+              <div class="help-text help-gen"> Click on me to reinitialize sgRNA </div>
+              <div class="help-text help-section"> Click on me to display only sgRNA which are on me </div>
 
             </div>
-          </div>,
-    ])
-      }
+
+
+             {/* ************* Card *************  */}
+            <svg id='displayGenomicCard' width={this.diagonal_svg} height={this.diagonal_svg}>
+              {this.generateGenomicCard()}
+              <text transform= {`translate(${this.diagonal_svg/2 - 30} , ${this.diagonal_svg/2})`}> {this.sizeSelected} pb </text>
+            </svg>
+
+             {/* ************* Plot *************  */}
+             {this.generatePlot()}
+
+          </div>
+        </div>,
+        ])
+    }
   }
 }
 
-// Display the entire blue circle
-function DisplayGenome (root, width, height) {
+/**
+* Display the genome by a blue circle
+* @param {ShadowRoot} nivMax Maximal level of the sunburst
+* @param {Number} nivCurr Maximal level of the sunburst
+* @param {Number} nbSec Number of section by circle
+*/
+function DisplayGenome (root:ShadowRoot, width:number, height:number):void {
   // Clean all arc
   d3.select(root.querySelector('#displayGenomicCard')).selectAll('g').remove();
   let arcGenerator = d3.arc();
