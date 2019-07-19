@@ -1,6 +1,8 @@
 import { Component, Prop, State, Listen, EventEmitter, Event, Element, h } from '@stencil/core';
 import * as d3 from "d3";
 import * as clTree from './clusteringTree';
+import * as dspl from './displayPlot';
+import "@mmsb/mmsb-select";
 
 @Component({
   tag: 'genomic-card',
@@ -39,24 +41,15 @@ export class MyComponent {
     this.emitOrgChange = this.emitOrgChange.bind(this);
     this.emitRefChange = this.emitRefChange.bind(this);
     this.emitSgrnaChange = this.emitSgrnaChange.bind(this);
-    this.generatePlot = this.generatePlot.bind(this);
     this.generateGenomicCard = this.generateGenomicCard.bind(this);
   }
-
 
 // *************************** CLICK ***************************
   @Listen('changeOrgCard')
   handleChangeOrg(event: CustomEvent) {
     this.orgSelected= event.detail;
-    let all_data = JSON.parse(this.all_data);
-    this.genomeRef = Object.keys(all_data[this.orgSelected]);
     this.refSelected = this.genomeRef[0];
-    this.show_data = all_data[this.orgSelected][this.refSelected];
-    this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
-    this.subSgrna = undefined;
-    this.selectedSection = -1;
-    (this.allSize == undefined) ? this.sizeSelected = 4518734 : this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
-    new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
+    this.updateDataOrg();
     console.log(`CLICK on ${this.orgSelected}`);
   }
 
@@ -64,12 +57,16 @@ export class MyComponent {
   handleChangeOrgRefSgrna(event: CustomEvent) {
     var tmp_name = event.detail.axis.split("$");
     this.orgSelected = tmp_name[0];
-    this.refSelected = tmp_name[1];
     this.sgrnaSelected = event.detail.sgrna;
+    this.updateDataOrg(tmp_name[1]);
+  }
+
+  updateDataOrg(ref=undefined) {
     this.subSgrna = undefined;
     this.selectedSection = -1;
     let all_data = JSON.parse(this.all_data);
     this.genomeRef = Object.keys(all_data[this.orgSelected]);
+    ref === undefined ? this.refSelected = this.genomeRef[0] : ref;
     this.show_data = all_data[this.orgSelected][this.refSelected];
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
     (this.allSize == undefined) ? this.sizeSelected = 4518734 : this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
@@ -79,16 +76,22 @@ export class MyComponent {
   @Listen('changeRefCard')
   handleChangeRef(event: CustomEvent) {
     this.refSelected = event.detail;
-    let all_data = JSON.parse(this.all_data);
-    this.show_data = all_data[this.orgSelected][this.refSelected];
-    this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
-    this.subSgrna = undefined;
-    this.selectedSection = -1;
-    (this.allSize == undefined) ? this.sizeSelected = 4518734 : this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
-    new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 5);
+    this.updateDataOrg();
   }
 
-  @Listen('changeSgrnaCard')
+  @Listen('sectionSelected', {target: 'window'})
+  handleSectionSelected(event: CustomEvent) {
+    this.subSgrna = event.detail["sgRNA"];
+    this.selectedSection = event.detail["section"];
+    this.sgrnaSelected = this.subSgrna[0];
+  }
+
+  @Listen('sectionSelectedSG', {target: 'window'})
+  handleSectionSelectedSG(event: CustomEvent) {
+    this.emitsgData(event.detail["sgRNA"], event.detail["min"], event.detail["max"]);
+  }
+
+  @Listen('mmsb-select.select')
   handleChangeSgrna(event: CustomEvent) {
     this.sgrnaSelected = event.detail;
   }
@@ -127,39 +130,9 @@ export class MyComponent {
   }
 
 // *************************** GENOMIC CARD ***************************
-  componentDidUpdate() {
-    this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
-      this.subSgrna = undefined;
-      this.selectedSection = -1;
-      this.sgrnaSelected = undefined;
-    })
-    this.styleHelp(".genomeCircle>path", ".help-gen");
-    this.styleHelp(".sunburst>path", ".help-section");
-  }
-
-  componentDidLoad() {
-      if (this.size != undefined){
-        this.allSize = JSON.parse(this.size)
-        this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
-      }else {
-        this.sizeSelected = 4518734
-      }
-    DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
-    this.generatePlot();
-    if(this.element.shadowRoot.querySelector('.genomeCircle') != null) {
-      this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
-        this.subSgrna = undefined;
-      })
-    }
-    this.styleHelp(".genomeCircle>path", ".help-gen");
-    this.styleHelp(".sunburst>path", ".help-section");
-  }
-
-
   generateGenomicCard() {
     let width = this.diagonal_svg, height = this.diagonal_svg;
     DisplayGenome(this.element.shadowRoot, width, height);
-    if (this.sgrnaSelected == undefined || this.sgrnaSelected == '') { return;}
     var sizeGenome = this.sizeSelected;
     let data = [];
     let dataOneSgrna = this.show_data[this.sgrnaSelected];
@@ -211,199 +184,24 @@ export class MyComponent {
           .style('display', "none");
       })
       ;
-      // Add the arc for the sgRNA
-      // The animation to place sgRNA
-      function arcFunction(datum){
-        let end: number = +datum.sgRNA.length + +datum.start;
-        datum.startAngle = 2*Math.PI * datum.start * (1/sizeGenome);
-        let endAngle = 2*Math.PI * end * (1/sizeGenome)  ;
-        datum.endAngle = (Math.abs(endAngle - datum.startAngle) < 0.01) ? endAngle + 0.01 : endAngle;
-        return d3.select(this)
-                .transition()
-                  .ease(d3.easeBackInOut)
-                  .duration(600)
-                  .attr('d', pathSgRNA)
-                  .attr('transform', `translate( ${width / 2} , ${height / 2})`);
-      }
+    // Add the arc for the sgRNA
+    // The animation to place sgRNA
+    function arcFunction(datum){
+      let end: number = +datum.sgRNA.length + +datum.start;
+      datum.startAngle = 2*Math.PI * datum.start * (1/sizeGenome);
+      let endAngle = 2*Math.PI * end * (1/sizeGenome)  ;
+      datum.endAngle = (Math.abs(endAngle - datum.startAngle) < 0.01) ? endAngle + 0.01 : endAngle;
+      return d3.select(this)
+              .transition()
+                .ease(d3.easeBackInOut)
+                .duration(600)
+                .attr('d', pathSgRNA)
+                .attr('transform', `translate( ${width / 2} , ${height / 2})`);
+    }
   }
 
 // *************************** SUNBURST **************************
-  generatePlot() {
-    // raw tree clustering sequences and sections
-    const treeClustering = new clTree.TreeClustering(this.sizeSelected, this.show_data, 4, 7);
-    const radius = this.diagonal_svg*10/100 + this.diagonal_svg*15/100, padInnerRadius = this.diagonal_svg*10/100 + this.diagonal_svg*10/100;
-    // root of the treeClustering hierarchical
-    const root = d3.partition().size([2*Math.PI, radius])(d3.hierarchy(treeClustering.root).sum((d) => d['niv']));
-    // Find the maximum number of sequences in a section for the color scale
-    let maxChild = Math.max(...treeClustering.root['children'].map(o => {return o.weight}));
-    const arc =d3.arc()
-                .startAngle(d =>  d['x0'])
-                .endAngle(d => d['x1'])
-                .padAngle(d => Math.min((d['x1'] - d['x0']) / 2, 0.005))
-                .padRadius(radius / 2)
-                .innerRadius(d => d['y0'] + padInnerRadius)
-                .outerRadius(d => d['y1'] - 1 + padInnerRadius);
 
-    const color = d3.scaleQuantize()
-                    .domain([0, maxChild])
-                    // @ts-ignore
-                    .range(['#F7FACE', '#E0F6BF', '#C1F2B0', '#A3EDAA', '#96E7B9', '#8BE0CD', '#80CDD8', '#6DA7C3', '#5B81AD', '#4A5E95', '#3A3E7D']);
-
-    const svg = d3.select(this.element.shadowRoot.querySelector('#displayGenomicCard'));
-
-    function findSgrnaChildren(list_children:Object):string[] {
-      let allSgrna: string[] = [];
-
-      for (var i in list_children){
-        // Il y a des enfants
-        if(list_children[i].hasOwnProperty('children')) {
-          allSgrna = [... new Set([...findSgrnaChildren(list_children[i].children) , ...allSgrna])];
-          // Il n'y a plus d'enfants, mais il y a des données
-        } else if (list_children[i].data.children != {}){
-          allSgrna = [... new Set([...Object.keys(list_children[i].data.children) , ...allSgrna])];
-        }
-        // Sinon rien à ajouter
-      }
-      return allSgrna;
-    }
-
-    // Section
-    svg.append('g')
-        .attr('class', 'sunburst')
-        .attr('fill-opacity', 0.6)
-        .selectAll('path')
-        .data(root.descendants().filter(d => d.depth > 0))
-        .enter().append('path')
-          .attr('fill',(d, i) => {
-            if(this.selectedSection == -1) {
-              // Specific color for zero
-              if (d.data['weight'] == 0) {
-                return "rgba(226, 210, 186, 0.46)";
-              }else {
-                return color(d.data['weight']);
-              }
-            } else if (i == this.selectedSection){
-              return "rgba(78, 195, 236, 0.9)";
-            } else {
-              return "rgba(226, 210, 186, 0.46)";
-            }
-          })
-          // @ts-ignore
-          .attr('d', arc)
-          .attr('transform', 'translate(' + this.diagonal_svg/2 + ', ' + this.diagonal_svg/2 + ')')
-          // .attr('opacity', (d) => {return d.depth < 2 ? 1 : 0})
-          .on("click", (d, i) => {
-            let uniqSgrna:string[];
-            if(d.hasOwnProperty('children')) {
-              uniqSgrna= findSgrnaChildren(d.children);
-            } else   {
-              uniqSgrna = Object.keys(d.data.children);
-            }
-            this.subSgrna = uniqSgrna;
-            this.sgrnaSelected = undefined;
-            this.selectedSection = i;
-            let subData={};
-            Object.keys(this.show_data).forEach(e => {
-              if(this.subSgrna.includes(e)){
-                subData[e] = this.show_data[e];
-              }
-            });
-            if(this.gene != undefined) this.emitsgData(subData, parseFloat(d.data.min), parseFloat(d.data.max));
-          });
-
-    // Text
-    svg.append("g")
-    .attr('transform', 'translate(' + this.diagonal_svg/2 + ', ' + this.diagonal_svg/2 + ')')
-        .attr("pointer-events", "none")
-        .attr("text-anchor", "middle")
-      .selectAll("text")
-      .data(root.descendants().filter(d => d.depth > 0 && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
-      .enter().append("text")
-        .attr("transform", function(d) {
-          const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-          const y = (d.y0 + d.y1) / 2 + padInnerRadius;
-          return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-        })
-        .attr("dy", "0.35em")
-        .text(d => d.data['weight']);
-
-        ///////////////////////////////////////////////////////////////////////////
-        //////////////// Create the gradient for the legend ///////////////////////
-        ///////////////////////////////////////////////////////////////////////////
-
-        //Extra scale since the color scale is interpolated
-        var tempScale = d3.scaleLinear()
-        	.domain([0, maxChild])
-        	.range([0, 11]);
-
-        //Calculate the variables for the temp gradient
-        var numStops = 10;
-        let tempRange = tempScale.domain();
-        tempRange[2] = tempRange[1] - tempRange[0];
-        let tempPoint = [];
-        for(var i = 0; i < numStops; i++) {
-        	tempPoint.push(i * tempRange[2]/(numStops-1) + tempRange[0]);
-        }
-
-        //Create the gradient
-        svg.append("defs")
-        	.append("linearGradient")
-        	.attr("id", "legend-weather")
-        	.attr("x1", "0%").attr("y1", "0%")
-        	.attr("x2", "100%").attr("y2", "0%")
-        	.selectAll("stop")
-        	.data(d3.range(numStops))
-        	.enter().append("stop")
-          // @ts-ignore
-        	.attr("offset", function(d,i) { return tempScale( tempPoint[i] )/12; })
-          // @ts-ignore
-        	.attr("stop-color", function(d,i) { return color( tempPoint[i] ); });
-
-        ///////////////////////////////////////////////////////////////////////////
-    ////////////////////////// Draw the legend ////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-
-    var legendWidth = Math.min(200, 400);
-
-    //Color Legend container
-    var legendsvg = svg.append("g")
-    	.attr("class", "legendWrapper")
-    	.attr("transform", "translate(" + 130 + "," + 30 + ")");
-
-    //Draw the Rectangle
-    legendsvg.append("rect")
-    	.attr("class", "legendRect")
-    	.attr("x", -legendWidth/2)
-    	.attr("y", 0)
-    	.attr("rx", 8/2)
-    	.attr("width", legendWidth)
-    	.attr("height", 8)
-    	.style("fill", "url(#legend-weather)");
-
-    //Append title
-    legendsvg.append("text")
-    	.attr("class", "legendTitle")
-    	.attr("x", 0)
-    	.attr("y", -10)
-    	.style("text-anchor", "middle")
-    	.text("Color scale ");
-
-    //Set scale for x-axis
-    var xScale = d3.scaleLinear()
-    	 .range([-legendWidth/2, legendWidth/2])
-    	 .domain([0,maxChild] );
-
-    //Define x-axis
-    var xAxis = d3.axisBottom(xScale)
-    	  .ticks(5)
-    	  .tickFormat( (d) => {return d + ""});
-    //Set up X axis
-    legendsvg.append("g")
-    	.attr("class", "axis")
-    	.attr("transform", "translate(0," + (10) + ")")
-    	.call(xAxis);
-    return svg.node();
-  }
 
 
 // *************************** DISPLAY ***************************
@@ -416,6 +214,7 @@ export class MyComponent {
       return "";
     }
     let dataOneSgrna = this.show_data[this.sgrnaSelected];
+    // let text = "<span id='coordBoxHeader'>" + this.sgrnaSelected + " : " + dataOneSgrna.length +  "</span></br>";
     let text = this.sgrnaSelected + " : " + dataOneSgrna.length +  "\n";
     dataOneSgrna.forEach(coord => {
       text += coord + "\n";
@@ -436,6 +235,36 @@ export class MyComponent {
     }
   }
 
+  componentDidUpdate() {
+    this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
+      this.subSgrna = undefined;
+      this.selectedSection = -1;
+      this.sgrnaSelected = this.allSgrna[0];
+    })
+    this.styleHelp(".genomeCircle>path", ".help-gen");
+    this.styleHelp(".sunburst>path", ".help-section");
+  }
+
+  componentDidLoad() {
+      if (this.size != undefined){
+        this.allSize = JSON.parse(this.size)
+        this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
+      }else {
+        this.sizeSelected = 4518734
+      }
+    DisplayGenome(this.element.shadowRoot, this.diagonal_svg, this.diagonal_svg);
+    this.generateGenomicCard();
+    dspl.generateSunburst(this.sizeSelected, this.show_data, this.diagonal_svg, this.element.shadowRoot.querySelector('#displayGenomicCard'), this.selectedSection, this.gene);
+
+    if(this.element.shadowRoot.querySelector('.genomeCircle') != null) {
+      this.element.shadowRoot.querySelector('.genomeCircle').addEventListener("click", () => {
+        this.subSgrna = undefined;
+      })
+    }
+    this.styleHelp(".genomeCircle>path", ".help-gen");
+    this.styleHelp(".sunburst>path", ".help-section");
+  }
+
   render() {
     let tabOrgName = this.org_names.split("&");
 
@@ -452,6 +281,7 @@ export class MyComponent {
         this.refSelected = this.genomeRef[0];
         this.show_data = all_data[this.orgSelected][this.refSelected];
         this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
+        this.sgrnaSelected = this.allSgrna[0];
       }
     }
 
@@ -502,19 +332,13 @@ export class MyComponent {
 
             <div class="select-menu">
               <span>sgRNA</span>
-              <select class="custom-select" onChange={e => this.emitSgrnaChange(e)} style={{background:(this.subSgrna == undefined) ? "none" : "rgba(78, 195, 236, 0.2)"}}>
-                <option>  </option>
-                {(this.subSgrna == undefined) ?
-                  (this.allSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>)) :
-                  (this.subSgrna.map(sgRna => (sgRna != this.sgrnaSelected) ? <option>{sgRna}</option> : <option selected>{sgRna}</option>))
-                }
-              </select>
+              <mmsb-select label="Select sgRNA" data={this.subSgrna === undefined ? this.allSgrna.map(sgRna => [sgRna, sgRna]) : this.subSgrna.map(sgRna => [sgRna, sgRna])}></mmsb-select>
             </div>
             </div>
 
 
             <div>
-              <p style={{padding:"12px 0px 0px 230px", margin:"Opx 0px 5px 0px"}}> <strong> Coordinates Box </strong></p>
+              <p style={{padding:"12px 0px 0px 230px", marginBottom:"0px"}}> <strong> Coordinates Box </strong></p>
               <p class="coordBox">
                 {this.showCoord()}
               </p>
@@ -534,7 +358,7 @@ export class MyComponent {
             </svg>
 
              {/* ************* Plot *************  */}
-             {this.generatePlot()}
+             {dspl.generateSunburst(this.sizeSelected, this.show_data, this.diagonal_svg, this.element.shadowRoot.querySelector('#displayGenomicCard'), this.selectedSection, this.gene)}
 
           </div>
         </div>,
