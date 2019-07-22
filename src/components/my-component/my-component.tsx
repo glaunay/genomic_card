@@ -57,6 +57,7 @@ export class MyComponent {
     var tmp_name = event.detail.axis.split("$");
     this.orgSelected = tmp_name[0];
     this.sgrnaSelected = event.detail.sgrna;
+
     this.updateDataOrg(tmp_name[1]);
   }
 
@@ -65,7 +66,7 @@ export class MyComponent {
     this.selectedSection = -1;
     let all_data = JSON.parse(this.all_data);
     this.genomeRef = Object.keys(all_data[this.orgSelected]);
-    ref === undefined ? this.refSelected = this.genomeRef[0] : ref;
+    this.refSelected = (ref === undefined) ?  this.genomeRef[0] : ref;
     this.show_data = all_data[this.orgSelected][this.refSelected];
     this.allSgrna = Object.keys(all_data[this.orgSelected][this.refSelected]);
     (this.allSize == undefined) ? this.sizeSelected = 4518734 : this.sizeSelected = this.allSize[this.orgSelected][this.refSelected]
