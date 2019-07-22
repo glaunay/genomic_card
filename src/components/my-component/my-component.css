@@ -22,16 +22,40 @@
 
 /*  Tooltip for coordinates*/
 .tooltip-coord {
-    position: absolute;
-    text-align: left;
-    width: 220px;
-    height: 65px;
-    padding: 2px;
-    font: 12px sans-serif;
-    background: lightsteelblue;
-    border: 0px;
-    border-radius: 8px;
-    pointer-events: none;
+  position: absolute;
+  text-align: left;
+  width: 220px;
+  height: 65px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+#notif{
+  display:initial;
+  width: 1.2em;
+  margin-left: 8px;
+}
+
+#notif .material-icons{
+  font-size: 1.2em;
+  cursor: help;
+}
+
+#notif:hover #notif-text{
+  display: block;
+  position: absolute;
+  background: #6da7c3b3;
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 1;
+}
+
+#notif-text{
+  display: none
 }
 
 /*  The loader Spinner */
@@ -89,7 +113,6 @@
   background: #6da7c3b3;
   border-radius: 8px;
   padding: 8px;
-
 }
 
 .help {

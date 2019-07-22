@@ -168,6 +168,7 @@ export class MyComponent {
     })
     this.styleHelp(".genomeCircle>path", ".help-gen");
     this.styleHelp(".sunburst>path", ".help-section");
+    this.styleHelp("#notif>.material-icons", "#notif-text");
     this.showCoord();
   }
 
@@ -189,6 +190,7 @@ export class MyComponent {
     }
     this.styleHelp(".genomeCircle>path", ".help-gen");
     this.styleHelp(".sunburst>path", ".help-section");
+    this.styleHelp("#notif>.material-icons", "#notif-text");
     this.showCoord();
   }
 
@@ -260,7 +262,7 @@ export class MyComponent {
             <div class="select-menu">
               <span>sgRNA</span>
               {(this.subSgrna === undefined) ?
-              "" :   <i class="material-icons">  notifications </i> }
+              "" :   <div id="notif"><i class="material-icons">  notifications </i><div id="notif-text">Only sgRNA on the selected <br/>sector are shown</div></div> }
               <mmsb-select label="Select sgRNA" data={this.subSgrna === undefined ? this.allSgrna.map(sgRna => [sgRna, sgRna]) : this.subSgrna.map(sgRna => [sgRna, sgRna])}></mmsb-select>
             </div>
             </div>
@@ -272,7 +274,7 @@ export class MyComponent {
               </p>
             </div>
             <div class="help">
-              <i class="material-icons" style={{cursor: "pointer"}}>help</i>
+              <i class="material-icons" style={{cursor: "help"}}>help</i>
               <div class="help-text help-gen"> Click on me to reinitialize sgRNA </div>
               <div class="help-text help-section"> Click on me to display only sgRNA which are on me </div>
 
