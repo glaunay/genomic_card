@@ -1,3 +1,7 @@
+.main-genome-card{
+  font-family: "Helvetica Neue", Helvetica, Arial;
+}
+
 /*  Selector to choose reference and sgRNA */
 .select-menu{
   margin-top: 15px;
@@ -61,6 +65,20 @@
   border-radius: 8px;
 }
 
+#coordBoxHeader{
+  color:rgba(239, 71, 111);
+  font-weight: bold;
+  padding: 11px;
+  background-color: white;
+  position: absolute;
+  border-bottom: 1px solid #9e9e9e99;
+  width: calc(50% - 22px);
+}
+
+#coordBoxText{
+  padding: 50px 10px 10px 10px;
+}
+
 
 .tooltip-coord>.material-icons {
   font-size: 12px;
@@ -69,7 +87,7 @@
 .help:hover .help-text{
   display: block;
   position: absolute;
-  background: rgba(103, 203, 222, 0.9);
+  background: #6da7c3b3;
   border-radius: 8px;
   padding: 8px;
 
@@ -84,16 +102,16 @@
 }
 
 .nav-tabs .nav-link.active{
-  color: rgba(79, 93, 117) !important;
+  color: rgba(239, 71, 111) !important;
 }
 
 .nav-link{
-  color: rgba(239, 71, 111) !important;
+  color: rgba(79, 93, 117) !important;
 }
 
 .nav-link:hover{
   background: rgba(187, 136, 137, 0.3) !important;
-  color: rgba(79, 93, 117) !important;
+  color: rgba(239, 71, 111) !important;
 }
 
 .nav-tabs .nav-link.active:hover{

@@ -128,25 +128,22 @@ export class MyComponent {
     this.sgDataSection.emit(msg);
   }
 
-// *************************** GENOMIC CARD ***************************
-
 
 // *************************** DISPLAY ***************************
   /**
-  * Return all coordinates of a given sgRNA if the state is not undefined
-  * @returns {string} The sgRNA, the number of occurences and coordinates
+  * Set all coordinates of a given sgRNA if the state is not undefined
   */
   showCoord():string {
     if(this.sgrnaSelected == undefined){
       return "";
     }
     let dataOneSgrna = this.show_data[this.sgrnaSelected];
-    // let text = "<span id='coordBoxHeader'>" + this.sgrnaSelected + " : " + dataOneSgrna.length +  "</span></br>";
-    let text = this.sgrnaSelected + " : " + dataOneSgrna.length +  "\n";
+    let text = "<div id='coordBoxHeader'>" + this.sgrnaSelected + " : " + dataOneSgrna.length +  "</div><div id='coordBoxText'>";
     dataOneSgrna.forEach(coord => {
       text += coord + "\n";
     })
-    return (text);
+    text += "</div>"
+    this.element.shadowRoot.querySelector(".coordBox").innerHTML = text;
   }
 
   /**
@@ -170,6 +167,7 @@ export class MyComponent {
     })
     this.styleHelp(".genomeCircle>path", ".help-gen");
     this.styleHelp(".sunburst>path", ".help-section");
+    this.showCoord();
   }
 
   componentDidLoad() {
@@ -190,6 +188,7 @@ export class MyComponent {
     }
     this.styleHelp(".genomeCircle>path", ".help-gen");
     this.styleHelp(".sunburst>path", ".help-section");
+    this.showCoord();
   }
 
   render() {
@@ -211,7 +210,7 @@ export class MyComponent {
         this.sgrnaSelected = this.allSgrna[0];
       }
     }
-
+    console.log(this.subSgrna == undefined)
     let displayLoad=styleDisplay[0], displayGenomeCard=styleDisplay[1];
     if (this.all_data == undefined) {
       return ([
@@ -259,6 +258,8 @@ export class MyComponent {
 
             <div class="select-menu">
               <span>sgRNA</span>
+              {(this.subSgrna === undefined) ?
+              "" :   <i class="material-icons">  notifications </i> }
               <mmsb-select label="Select sgRNA" data={this.subSgrna === undefined ? this.allSgrna.map(sgRna => [sgRna, sgRna]) : this.subSgrna.map(sgRna => [sgRna, sgRna])}></mmsb-select>
             </div>
             </div>
@@ -267,11 +268,10 @@ export class MyComponent {
             <div>
               <p style={{padding:"12px 0px 0px 230px", marginBottom:"0px"}}> <strong> Coordinates Box </strong></p>
               <p class="coordBox">
-                {this.showCoord()}
               </p>
             </div>
             <div class="help">
-              <i class="material-icons">help</i>
+              <i class="material-icons" style={{cursor: "pointer"}}>help</i>
               <div class="help-text help-gen"> Click on me to reinitialize sgRNA </div>
               <div class="help-text help-section"> Click on me to display only sgRNA which are on me </div>
 
